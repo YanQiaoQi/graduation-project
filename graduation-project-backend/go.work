@@ -1,0 +1,8 @@
+go 1.20
+
+use (
+	./
+	./routes/v1
+	./controllers/v1/auth
+	./middlewares/cors
+)
