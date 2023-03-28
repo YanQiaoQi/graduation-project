@@ -1,5 +1,4 @@
 import {
-	ChaincodeInterface,
 	success,
 	error,
 	start,
@@ -15,7 +14,7 @@ export const chaincode = {
 	async Invoke(stub) {
 		let { fcn, params } = stub.getFunctionAndParameters();
 		// @ts-ignore
-		const method = methods?.[fcn];
+		const method = this?.[fcn];
 		if (!method) {
 			console.error("未找到", fcn, "函数");
 		}
