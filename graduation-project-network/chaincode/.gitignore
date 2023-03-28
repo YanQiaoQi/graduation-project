@@ -8,5 +8,5 @@
 /package-lock.json
 
 # production
-/dist
+# /dist
 
