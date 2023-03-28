@@ -7,7 +7,7 @@ import {
 
 import * as methods from "./methods";
 
-const chaincode: ChaincodeInterface = {
+export const chaincode: ChaincodeInterface = {
 	async Init(stub) {
 		return success(
 			Buffer.from("Initialized Successfully!")
