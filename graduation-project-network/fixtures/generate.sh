@@ -7,9 +7,11 @@ function generateCerts() {
         export PATH=/src/github.com/hyperledger/fabric/fabric-samples/bin:$PATH
     fi
     
+    echo 
     echo "##########################################################"
     echo "##### Generate certificates using cryptogen tool #########"
     echo "##########################################################"
+    echo 
     
     if [ -d "crypto-config" ]; then
         rm -Rf crypto-config
@@ -45,7 +47,7 @@ function generateChannelArtifacts() {
     echo "CONSENSUS_TYPE=solo"
 
     set -x
-    configtxgen -profile TwoOrgsOrdererGenesis -channelID genesisChannel -outputBlock ./channel-artifacts/genesis.block
+    configtxgen -profile TwoOrgsOrdererGenesis -channelID genesischannel -outputBlock ./channel-artifacts/genesis.block
     res=$?
     set +x
 
@@ -60,6 +62,7 @@ function generateChannelArtifacts() {
     echo "#################################################################"
     echo "### Generating channel configuration transaction 'channel.tx' ###"
     echo "#################################################################"
+    echo 
 
     set -x
     configtxgen -profile TwoOrgsChannel -channelID mychannel -outputCreateChannelTx ./channel-artifacts/channel.tx 
@@ -77,6 +80,7 @@ function generateChannelArtifacts() {
     echo "#################################################################"
     echo "#######    Generating anchor peer update for Org1MSP   ##########"
     echo "#################################################################"
+    echo 
 
     set -x
     configtxgen -profile TwoOrgsChannel -channelID mychannel -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -asOrg Org1MSP

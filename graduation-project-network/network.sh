@@ -10,7 +10,7 @@ function printHelp() {
 
 function networkUp() {
     # generate artifacts if they don't exist
-    if [ ! -d "crypto-config" ]; then
+    if [ ! -d "./fixtures/crypto-config" ]; then
         ./fixtures/generate.sh
     fi
 
