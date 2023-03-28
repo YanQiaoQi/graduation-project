@@ -5,7 +5,7 @@ import {
 	start,
 } from "fabric-shim";
 
-export const chaincode: ChaincodeInterface = {
+export const chaincode = {
 	async Init(stub) {
 		return success(
 			Buffer.from("Initialized Successfully!")
