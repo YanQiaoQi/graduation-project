@@ -8,9 +8,7 @@ function generateCerts() {
     fi
     
     echo 
-    echo "##########################################################"
-    echo "##### Generate certificates using cryptogen tool #########"
-    echo "##########################################################"
+    echo "0.1. 生成密钥证书"
     echo 
     
     if [ -d "crypto-config" ]; then
@@ -38,12 +36,7 @@ function generateChannelArtifacts() {
         export PATH=/src/github.com/hyperledger/fabric/fabric-samples/bin:$PATH
     fi
     
-    # 生成 创世区块
-    echo "##########################################################"
-    echo "#########  Generating Orderer Genesis block ##############"
-    echo "##########################################################"
-    # Note: For some unknown reason (at least for now) the block file can't be
-    # named orderer.genesis.block or the orderer will fail to launch!
+    echo "0.2. 生成创世区块"
     echo "CONSENSUS_TYPE=solo"
 
     set -x
@@ -55,13 +48,12 @@ function generateChannelArtifacts() {
         echo "Failed to generate orderer genesis block..."
         exit 1
     fi
+
     echo "Succeeded to generate genesis block"
 
     # 生成 channel 配置文件
     echo
-    echo "#################################################################"
-    echo "### Generating channel configuration transaction 'channel.tx' ###"
-    echo "#################################################################"
+    echo "0.3. 生成通道配置文件"
     echo 
 
     set -x
@@ -73,13 +65,12 @@ function generateChannelArtifacts() {
         echo "Failed to generate channel configuration transaction..."
         exit 1
     fi
+
     echo "Succeeded to generate channel"
 
     # 生成锚节点配置更新文件
     echo
-    echo "#################################################################"
-    echo "#######    Generating anchor peer update for Org1MSP   ##########"
-    echo "#################################################################"
+    echo "0.4. 生成锚节点配置更新文件"
     echo 
 
     set -x

@@ -1,11 +1,11 @@
 function printHelp() {
-  echo "Usage: "
-  echo "  network.sh <mode>"
-  echo "    <mode> - one of 'up', 'down', 'restart', 'generate' or 'upgrade'"
-  echo "      - 'up' - bring up the network with docker-compose up"
-  echo "      - 'down' - clear the network with docker-compose down"
-  echo "      - 'generate' - generate required certificates and genesis block"
-  echo "  network.sh -h (print this message)"
+    echo "Usage: "
+    echo "  network.sh <mode>"
+    echo "    <mode> - one of 'up', 'down', 'restart', 'generate' or 'upgrade'"
+    echo "      - 'up' - bring up the network with docker-compose up"
+    echo "      - 'down' - clear the network with docker-compose down"
+    echo "      - 'generate' - generate required certificates and genesis block"
+    echo "  network.sh -h (print this message)"
 }
 
 function networkUp() {
@@ -13,10 +13,11 @@ function networkUp() {
     if [ ! -d "./fixtures/crypto-config" ]; then
         ./fixtures/generate.sh
     fi
-
+    
+    echo "区块链启动"
     docker-compose -f ./fixtures/docker-compose.yaml up -d 2>&1
     docker ps -a
-
+    
     if [ $? -ne 0 ]; then
         echo "ERROR !!!! Unable to start network"
         exit 1
@@ -24,12 +25,15 @@ function networkUp() {
 }
 
 function networkDown() {
-
+    echo "关闭网络"
     docker-compose -f ./fixtures/docker-compose.yaml down
-    # Don't remove the generated artifacts -- note, the ledgers are always removed
-    if [ "$MODE" != "restart" ]; then
-        rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config
-    fi
+    echo "删除 channel-artifacts crypto-config"
+    rm -rf ./fixtures/channel-artifacts ./fixtures/crypto-config
+}
+
+function initChannel(){
+    echo "创建通道"
+    docker exec cli bash -c ""
 }
 
 MODE=$1
@@ -39,6 +43,9 @@ if [ "${MODE}" == "up" ]; then
     networkUp
     elif [ "${MODE}" == "down" ]; then ## Clear the network
     networkDown
+    elif [ "${MODE}" == "init" ]; then ## Clear the network
+    initChannel
+    
     elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
     ./fixtures/generate.sh
 else
