@@ -34,6 +34,7 @@ function generate(){
     fi
     
     # generate genesis block for orderer
+    mkdir $ARTIFACTS_DIRECTORY
     configtxgen -profile OneOrgOrdererGenesis -outputBlock ./$ARTIFACTS_DIRECTORY/genesis.block
     if [ "$?" -ne 0 ]; then
         echo "Failed to generate orderer genesis block..."
