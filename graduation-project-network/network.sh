@@ -27,13 +27,14 @@ function networkUp() {
 function networkDown() {
     echo "关闭网络"
     docker-compose -f ./fixtures/docker-compose.yaml down
+    docker volume prune
     echo "删除 channel-artifacts crypto-config"
     rm -rf ./fixtures/channel-artifacts ./fixtures/crypto-config
 }
 
 function initChannel(){
     echo "创建通道"
-    docker exec cli bash -c ""
+    docker exec cli bash  
 }
 
 MODE=$1

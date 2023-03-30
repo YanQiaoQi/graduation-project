@@ -1,0 +1,10 @@
+{
+	"name": "chaincode",
+	"version": "1.0.0",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"dependencies": {
+		"fabric-shim": "^2.5.2"
+	}
+}
