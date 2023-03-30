@@ -57,7 +57,7 @@ function generate(){
     
 }
 
-function netowrkUp(){
+function networkUp(){
     # generate fixtures if they don't exist
     if [ ! -d "./$CRYPTO_DIRECTORY" || ! -d "./$ARTIFACTS_DIRECTORY" ]; then
         generate
@@ -108,6 +108,7 @@ shift
 
 if [ "${MODE}" == "up" ]; then
     networkUp
+    chaincode
     elif [ "${MODE}" == "down" ]; then
     networkDown
     elif [ "${MODE}" == "generate" ]; then
