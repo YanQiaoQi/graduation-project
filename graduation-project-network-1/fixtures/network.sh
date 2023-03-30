@@ -2,6 +2,8 @@ export IMAGE_TAG=latest
 export COMPOSE_PROJECT_NAME=net
 export PATH=../bin:$PATH
 
+chmod +u+x ../bin/*
+
 # 通道名称
 CHANNEL_NAME=mychannel
 # 区块文件夹名称
@@ -10,6 +12,8 @@ ARTIFACTS_DIRECTORY=channel-artifacts
 CRYPTO_DIRECTORY=crypto-config
 
 ORDERER_ADDRESS=$ORDERER_ADDRESS
+
+
 
 function printHelp() {
     echo "Usage: "
