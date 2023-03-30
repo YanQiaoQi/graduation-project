@@ -7,7 +7,7 @@ const test = async (stub, argus) => {
 const chaincode = {
     async Init(stub) {
         return shim.success(
-            Buffer.from("Initialized Successfully!")
+            "Initialized Successfully!"
         );
     },
 
@@ -22,10 +22,10 @@ const chaincode = {
         }
         try {
             const payload = await method(stub, params);
-            return shim.success(Buffer.from(payload));
+            return shim.success(payload);
         } catch (e) {
             console.log(e);
-            return shim.error(Buffer.from(String(e)));
+            return shim.error(String(e));
         }
     },
 };
