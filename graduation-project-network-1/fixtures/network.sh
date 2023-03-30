@@ -96,7 +96,9 @@ function chaincode(){
     
     echo "实例化链码"
     docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l "$CC_RUNTIME_LANGUAGE" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
-    
+    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l "node" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
+
+
     sleep 10
     echo "调用链码"
     docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"test","Args":[]}'
