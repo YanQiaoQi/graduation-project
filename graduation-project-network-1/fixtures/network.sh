@@ -11,7 +11,7 @@ ARTIFACTS_DIRECTORY=channel-artifacts
 # 证书文件夹名称
 CRYPTO_DIRECTORY=crypto-config
 
-ORDERER_ADDRESS=$ORDERER_ADDRESS
+ORDERER_ADDRESS=orderer.example.com:7050
 
 
 
