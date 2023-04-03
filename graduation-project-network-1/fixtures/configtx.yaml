@@ -18,9 +18,6 @@ Organizations:
     Name: Org1MSP
     ID: Org1MSP
     MSPDir: ./crypto-config/peerOrganizations/org1.example.com/msp
-    AnchorPeers:
-      - Host: peer0.org1.example.com
-        Port: 7051
     Policies:
       Readers:
         Type: Signature
@@ -35,6 +32,10 @@ Organizations:
         Type: Signature
         Rule: "OR('Org1MSP.peer')"
 
+    AnchorPeers:
+      - Host: peer0.org1.example.com
+        Port: 7051
+
 Application: &ApplicationDefaults
   Organizations:
 
@@ -48,6 +49,9 @@ Application: &ApplicationDefaults
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
     Endorsement:
       Type: ImplicitMeta
       Rule: "MAJORITY Endorsement"
@@ -61,10 +65,8 @@ Orderer: &OrdererDefaults
     MaxMessageCount: 10
     AbsoluteMaxBytes: 99 MB
     PreferredMaxBytes: 512 KB
-  Kafka:
-    Brokers:
-      - 127.0.0.1:9092
   Organizations:
+
   Policies:
     Readers:
       Type: ImplicitMeta
@@ -81,8 +83,24 @@ Orderer: &OrdererDefaults
       Type: ImplicitMeta
       Rule: "ANY Writers"
 
+Channel: &ChannelDefaults
+  Policies:
+    # Who may invoke the 'Deliver' API
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    # Who may invoke the 'Broadcast' API
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    # By default, who may modify elements at this config level
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
 Profiles:
   OneOrgOrdererGenesis:
+    <<: *ChannelDefaults
     Orderer:
       <<: *OrdererDefaults
       Organizations:
@@ -93,6 +111,7 @@ Profiles:
           - *Org1
   OneOrgChannel:
     Consortium: SampleConsortium
+    <<: *ChannelDefaults
     Application:
       <<: *ApplicationDefaults
       Organizations:
