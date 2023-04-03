@@ -97,7 +97,7 @@ function chaincode(){
     # docker exec cli peer chaincode install -n app -v 1.0 -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode -l node
     
     echo "实例化链码"
-    docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org1MSP.member')"
+    docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n app -l node -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.peer','Org2MSP.peer')"
     
     sleep 10
