@@ -90,15 +90,16 @@ function chaincode(){
     CC_RUNTIME_LANGUAGE=node
     CC_SRC_PATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode
     CC_NAME=myapp
+    CC_VERSION=1.0
     
     echo "安装链码"
-    docker exec cli peer chaincode install -n $CC_NAME -v 1.0 -p "$CC_SRC_PATH" -l "$CC_RUNTIME_LANGUAGE"
+    docker exec cli peer chaincode install -n $CC_NAME -v $CC_VERSION -p $CC_SRC_PATH -l $CC_RUNTIME_LANGUAGE
+    # docker exec cli peer chaincode install -n app -v 1.0 -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode -l node
     
     echo "实例化链码"
-    docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l "$CC_RUNTIME_LANGUAGE" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
-    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l "node" -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
-
-
+    docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member','Org1MSP.member')"
+    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n app -l node -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.peer','Org2MSP.peer')"
+    
     sleep 10
     echo "调用链码"
     docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"test","Args":[]}'
