@@ -63,9 +63,9 @@ function generate(){
 
 function networkUp(){
     # generate fixtures if they don't exist
-    if [ ! -d "./$CRYPTO_DIRECTORY" || ! -d "./$ARTIFACTS_DIRECTORY" ]; then
-        generate
-    fi
+    # if [ ! -d "./$CRYPTO_DIRECTORY" || ! -d "./$ARTIFACTS_DIRECTORY" ]; then
+    #     generate
+    # fi
     
     echo "清除环境"
     docker rm $(docker ps -aq) -f
@@ -93,16 +93,16 @@ function chaincode(){
     CC_VERSION=1.0
     
     echo "安装链码"
-    docker exec cli peer chaincode install -n $CC_NAME -v $CC_VERSION -p $CC_SRC_PATH -l $CC_RUNTIME_LANGUAGE
+    docker exec cli peer chaincode install -n $CC_NAME -v $CC_VERSION -p $CC_SRC_PATH -l $CC_RUNTIME_LANGUAGE 
     # docker exec cli peer chaincode install -n app -v 1.0 -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode -l node
     
     echo "实例化链码"
     docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
-    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}'
+    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     
     # echo "调用链码"
     # docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
-    # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"function":"storeDataHash","Args":["1","123456"]}'
+    # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"Args":["storeDataHash","1","123456"]}'
 }
 
 function networkDown(){
