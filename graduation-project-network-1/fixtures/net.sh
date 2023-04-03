@@ -87,8 +87,8 @@ function networkUp(){
 }
 
 function chaincode(){
-    CC_RUNTIME_LANGUAGE=node
-    CC_SRC_PATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode
+    CC_RUNTIME_LANGUAGE=golang
+    CC_SRC_PATH=github.com/hyperledger/fabric/peer/chaincode
     CC_NAME=myapp
     CC_VERSION=1.0
     
@@ -102,7 +102,7 @@ function chaincode(){
     
     sleep 10
     echo "调用链码"
-    docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"test","Args":[]}'
+    docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
     # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"function":"test","Args":[]}'
 }
 
