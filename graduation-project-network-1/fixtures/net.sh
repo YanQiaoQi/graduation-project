@@ -25,11 +25,9 @@ function printHelp() {
     echo "  network.sh -h (print this message)"
 }
 
-function generate(){
+function generateCrypto(){
     # remove previous crypto material and config transactions
-    rm -rf channel-artifacts
     rm -rf crypto-config
-    
     # generate crypto material
     cryptogen generate --config=./crypto-config.yaml
     if [ "$?" -ne 0 ]; then
@@ -37,9 +35,15 @@ function generate(){
         exit 1
     fi
     
+    
+}
+
+function generateConfig(){
+    rm -rf channel-artifacts
     # generate genesis block for orderer
     mkdir $ARTIFACTS_DIRECTORY
     configtxgen -profile OneOrgOrdererGenesis -outputBlock ./$ARTIFACTS_DIRECTORY/genesis.block
+    # configtxgen -profile OneOrgOrdererGenesis -outputBlock ./channel-artifacts/genesis.block
     if [ "$?" -ne 0 ]; then
         echo "Failed to generate orderer genesis block..."
         exit 1
@@ -47,6 +51,7 @@ function generate(){
     
     # generate channel configuration transaction
     configtxgen -profile OneOrgChannel -outputCreateChannelTx ./$ARTIFACTS_DIRECTORY/channel.tx -channelID $CHANNEL_NAME
+    # configtxgen -profile OneOrgChannel -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID mychannel
     if [ "$?" -ne 0 ]; then
         echo "Failed to generate channel configuration transaction..."
         exit 1
@@ -54,6 +59,7 @@ function generate(){
     
     # generate anchor peer transaction
     configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./$ARTIFACTS_DIRECTORY/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
+    # configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -channelID mychannel -asOrg Org1MSP
     if [ "$?" -ne 0 ]; then
         echo "Failed to generate anchor peer update for Org1MSP..."
         exit 1
@@ -63,12 +69,9 @@ function generate(){
 
 function networkUp(){
     # generate fixtures if they don't exist
-    # if [ ! -d "./$CRYPTO_DIRECTORY" || ! -d "./$ARTIFACTS_DIRECTORY" ]; then
-    #     generate
-    # fi
-    
     echo "清除环境"
     docker rm $(docker ps -aq) -f
+    generateConfig
     
     echo "网络启动"
     docker-compose up -d 2>&1
@@ -81,6 +84,7 @@ function networkUp(){
     
     echo "创建通道"
     docker exec cli peer channel create -o $ORDERER_ADDRESS -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx
+    # docker exec cli peer channel create -o orderer.example.com:7050 -c mychannel -f ./channel-artifacts/channel.tx
     
     echo "加入通道"
     docker exec cli peer channel join -b mychannel.block
@@ -93,12 +97,12 @@ function chaincode(){
     CC_VERSION=1.0
     
     echo "安装链码"
-    docker exec cli peer chaincode install -n $CC_NAME -v $CC_VERSION -p $CC_SRC_PATH -l $CC_RUNTIME_LANGUAGE 
-    # docker exec cli peer chaincode install -n app -v 1.0 -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode -l node
+    docker exec cli peer chaincode install -n $CC_NAME -v $CC_VERSION -p $CC_SRC_PATH -l $CC_RUNTIME_LANGUAGE
+    # docker exec cli peer chaincode install -n app -v 1.0 -p github.com/hyperledger/fabric/peer/chaincode -l golang
     
     echo "实例化链码"
     docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
-    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
+    # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n app -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     
     # echo "调用链码"
     # docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
