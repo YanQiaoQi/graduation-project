@@ -1,4 +1,5 @@
 import express from "express";
+import { initMiddlewares } from "./middlewares";
 
 import { initRoutes } from "./routes/v1";
 
@@ -8,6 +9,8 @@ const port = 3000;
 app.get("/", (req, res) => {
 	res.send("Hello World!");
 });
+
+initMiddlewares(app);
 
 initRoutes(app);
 

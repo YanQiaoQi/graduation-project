@@ -104,9 +104,16 @@ function chaincode(){
     docker exec cli peer chaincode instantiate -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -l $CC_RUNTIME_LANGUAGE -v $CC_VERSION -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     
-    # echo "调用链码"
-    # docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
+    docker ps
+
+    sleep(3)
+
+    echo "调用链码"
+    docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
     # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"Args":["storeDataHash","1","123456"]}'
+    
+    docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"queryDataHash","Args":["1"]}'
+    # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"Args":["queryDataHash","1"]}'
 }
 
 function networkDown(){

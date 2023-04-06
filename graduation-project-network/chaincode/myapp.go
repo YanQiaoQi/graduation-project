@@ -9,11 +9,12 @@ import (
 
 // 数据结构定义
 type Data struct {
-	DataHash	string //json:"dataHash"
+	DataHash string //json:"dataHash"
 }
+
 type UpdateData struct {
-	DataHash	string //json:"dataHash"
-	NewDataHash	string //json:"newDataHash"
+	DataHash    string //json:"dataHash"
+	NewDataHash string //json:"newDataHash"
 }
 
 type SimpleChaincode struct {
@@ -39,21 +40,21 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) queryDataHash(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-    if len(args) != 1 {
-        return shim.Error("Incorrect number of arguments. Expecting 1")
-    }
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
 
-    // 查询数据哈希值
-    dataBytes, err := stub.GetState(args[0])
-    if err != nil {
-        return shim.Error(err.Error())
-    }
+	// 查询数据哈希值
+	dataBytes, err := stub.GetState(args[0])
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
-    //if dataBytes == nil {
-     //   return shim.Error("No data with key: " + args[0])
-    //}
+	//if dataBytes == nil {
+	//   return shim.Error("No data with key: " + args[0])
+	//}
 
-    return shim.Success(dataBytes)
+	return shim.Success(dataBytes)
 }
 
 func (t *SimpleChaincode) updateDataHash(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -98,7 +99,7 @@ func (t *SimpleChaincode) updateDataHash(stub shim.ChaincodeStubInterface, args 
 	return shim.Success(nil)
 }
 
-	// 将数据哈希值存储到链上
+// 将数据哈希值存储到链上
 func (t *SimpleChaincode) storeDataHash(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
@@ -122,8 +123,7 @@ func (t *SimpleChaincode) storeDataHash(stub shim.ChaincodeStubInterface, args [
 
 }
 
-
-	// 启动智能合约
+// 启动智能合约
 func main() {
 	err := shim.Start(new(SimpleChaincode))
 	if err != nil {
