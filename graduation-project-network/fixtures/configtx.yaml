@@ -87,12 +87,12 @@ Channel: &ChannelDefaults
   Policies:
     # Who may invoke the 'Deliver' API
     Readers:
-      Type: ImplicitMeta
-      Rule: "ANY Readers"
+      Type: Signature
+      Rule: "OR('Org1MSP.member','Org1MSP.client','Org1MSP.peer','Org1MSP.admin')"
     # Who may invoke the 'Broadcast' API
     Writers:
-      Type: ImplicitMeta
-      Rule: "ANY Writers"
+      Type: Signature
+      Rule: "OR('Org1MSP.member','Org1MSP.client','Org1MSP.peer','Org1MSP.admin')"
     # By default, who may modify elements at this config level
     Admins:
       Type: ImplicitMeta
