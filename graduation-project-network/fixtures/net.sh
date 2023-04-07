@@ -137,7 +137,8 @@ if [ "${MODE}" == "up" ]; then
     elif [ "${MODE}" == "down" ]; then
     networkDown
     elif [ "${MODE}" == "generate" ]; then
-    generate
+    generateCrypto
+    generateConfig
 else
     printHelp
     exit 1
