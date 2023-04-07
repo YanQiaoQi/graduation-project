@@ -2,6 +2,15 @@ export IMAGE_TAG=latest
 export COMPOSE_PROJECT_NAME=net
 export PATH=../bin:$PATH
 
+# cd /src/github.com/hyperledger/fabric/project/graduation-project/graduation-project-network
+
+# 获取 wsl ip
+# ip addr | grep eth0
+# 172.18.119.135
+
+# 本机 ip
+# 172.18.112.1
+
 chmod +u+x ../bin/*
 
 # 通道名称
@@ -105,8 +114,6 @@ function chaincode(){
     # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     
     docker ps
-
-    sleep(3)
 
     echo "调用链码"
     docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'

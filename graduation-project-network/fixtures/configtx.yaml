@@ -21,10 +21,10 @@ Organizations:
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('Org1MSP.member')"
+        Rule: "OR('Org1MSP.member','Org1MSP.client','Org1MSP.peer','Org1MSP.admin')"
       Writers:
         Type: Signature
-        Rule: "OR('Org1MSP.member')"
+        Rule: "OR('Org1MSP.member','Org1MSP.client','Org1MSP.peer','Org1MSP.admin')"
       Admins:
         Type: Signature
         Rule: "OR('Org1MSP.admin')"
