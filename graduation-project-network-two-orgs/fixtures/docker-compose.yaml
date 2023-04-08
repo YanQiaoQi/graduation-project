@@ -1,0 +1,108 @@
+# 网路结构
+
+version: '2'
+
+volumes:
+  orderer.example.com:
+  peer0.org1.example.com:
+  peer1.org1.example.com:
+  peer0.org2.example.com:
+  peer1.org2.example.com:
+
+
+networks:
+  graduation-project-network:
+
+
+services:
+
+  # ca
+  ca0:
+    container_name: ca0
+    extends:
+      file: docker-compose/docker-compose-ca.yaml
+      service: ca0
+    networks:
+      - graduation-project-network
+
+  ca1:
+    container_name: ca1
+    extends:
+      file: docker-compose/docker-compose-ca.yaml
+      service: ca1
+    networks:
+      - graduation-project-network
+
+  # peer 
+  orderer.example.com:
+    container_name: orderer.example.com
+    extends:
+      file: docker-compose/docker-compose-peer.yaml
+      service: orderer.example.com
+    networks:
+      - graduation-project-network
+
+  peer0.org1.example.com:
+    container_name: peer0.org1.example.com
+    extends:
+      file: docker-compose/docker-compose-peer.yaml
+      service: peer0.org1.example.com
+    networks:
+      - graduation-project-network
+
+  peer1.org1.example.com:
+    container_name: peer1.org1.example.com
+    extends:
+      file: docker-compose/docker-compose-peer.yaml
+      service: peer1.org1.example.com
+    networks:
+      - graduation-project-network
+
+  peer0.org2.example.com:
+    container_name: peer0.org2.example.com
+    extends:
+      file: docker-compose/docker-compose-peer.yaml
+      service: peer0.org2.example.com
+    networks:
+      - graduation-project-network
+
+  peer1.org2.example.com:
+    container_name: peer1.org2.example.com
+    extends:
+      file: docker-compose/docker-compose-peer.yaml
+      service: peer1.org2.example.com
+    networks:
+      - graduation-project-network
+
+  # cli
+  cli01:
+    container_name: cli01
+    extends:
+      file: docker-compose/docker-compose-cli.yaml
+      service: cli01
+    networks:
+      - graduation-project-network
+
+  cli11:
+    container_name: cli11
+    extends:
+      file: docker-compose/docker-compose-cli.yaml
+      service: cli11
+    networks:
+      - graduation-project-network
+
+  cli02:
+    container_name: cli02
+    extends:
+      file: docker-compose/docker-compose-cli.yaml
+      service: cli02
+    networks:
+      - graduation-project-network
+
+  cli12:
+    container_name: cli12
+    extends:
+      file: docker-compose/docker-compose-cli.yaml
+      service: cli12
+    networks:
+      - graduation-project-network
