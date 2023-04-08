@@ -79,6 +79,7 @@ Capabilities:
     # Prior to enabling V1.4.2 orderer capabilities, ensure that all
     # orderers on a channel are at v1.4.2 or later.
     V1_4_2: true
+    V1_4_1: true
     # V1.1 for Orderer enables the new non-backwards compatible
     # features and fixes of fabric v1.1
     V1_1: false
