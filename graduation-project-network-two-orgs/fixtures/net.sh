@@ -14,7 +14,7 @@ export PATH=../bin:$PATH
 chmod +u+x ../bin/*
 
 # 系统通道名称
-SYS_CHANNEL=syschannel
+export SYS_CHANNEL=syschannel
 # 通道名称
 CHANNEL_NAME=mychannel
 
