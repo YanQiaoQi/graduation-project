@@ -56,7 +56,8 @@ function generateCerts(){
 
 # 生成初始区块
 function generateChannelArtifacts(){
-    rm -rf $ARTIFACTS_DIRECTORY/*.block $ARTIFACTS_DIRECTORY/*.tx
+    rm -rf $ARTIFACTS_DIRECTORY
+    mkdir $ARTIFACTS_DIRECTORY
     
     # 生成创世区块
     set -x
