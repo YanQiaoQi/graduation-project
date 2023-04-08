@@ -125,7 +125,8 @@ function joinChannel(){
 function channel(){
     
     set -x
-    peer channel create -o $ORDERER_ADDRESS -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx
+    docker exec cli01 peer channel create -o $ORDERER_ADDRESS -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx
+    # docker exec cli01 peer channel create -o orderer.example.com:7050 -c mychannel -f ./channel-artifacts/channel.tx
     res=$?
     set +x
     
@@ -186,13 +187,6 @@ function networkUp(){
         echo "ERROR !!!! Unable to start network"
         exit 1
     fi
-    
-    echo "创建通道"
-    docker exec cli peer channel create -o $ORDERER_ADDRESS -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx
-    # docker exec cli peer channel create -o orderer.example.com:7050 -c mychannel -f ./channel-artifacts/channel.tx
-    
-    echo "加入通道"
-    docker exec cli peer channel join -b mychannel.block
 }
 
 function networkDown(){
