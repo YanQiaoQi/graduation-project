@@ -117,8 +117,8 @@ Application: &ApplicationDefaults
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
-  Capabilities:
-    <<: *ApplicationCapabilities
+#   Capabilities:
+#     <<: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults
   OrdererType: solo
@@ -156,8 +156,8 @@ Channel: &ChannelDefaults
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
 
-  Capabilities:
-    <<: *ChannelCapabilities
+#   Capabilities:
+#     <<: *ChannelCapabilities
 
 Profiles:
   TwoOrgsOrdererGenesis:
@@ -166,8 +166,8 @@ Profiles:
       <<: *OrdererDefaults
       Organizations:
         - *OrdererOrg
-      Capabilities:
-        <<: *OrdererCapabilities
+    #   Capabilities:
+    #     <<: *OrdererCapabilities
     Consortiums:
       SampleConsortium:
         Organizations:
@@ -181,5 +181,5 @@ Profiles:
       Organizations:
         - *Org1
         - *Org2
-      Capabilities:
-        <<: *ApplicationCapabilities
+    #   Capabilities:
+    #     <<: *ApplicationCapabilities
