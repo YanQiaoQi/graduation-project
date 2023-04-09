@@ -51,7 +51,7 @@ function generateConfig(){
     rm -rf channel-artifacts
     # generate genesis block for orderer
     mkdir $ARTIFACTS_DIRECTORY
-    configtxgen -profile OneOrgOrdererGenesis -outputBlock ./$ARTIFACTS_DIRECTORY/genesis.block
+    configtxgen -profile OneOrgOrdererGenesis -outputBlock ./$ARTIFACTS_DIRECTORY/genesis.block -channelID syschannel
     # configtxgen -profile OneOrgOrdererGenesis -outputBlock ./channel-artifacts/genesis.block
     if [ "$?" -ne 0 ]; then
         echo "Failed to generate orderer genesis block..."
@@ -78,6 +78,8 @@ function generateConfig(){
 
 function networkUp(){
     # generate fixtures if they don't exist
+    export CA_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/org1.example.com/ca && ls *_sk)
+    # export CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/org2.example.com/ca && ls *_sk)
     echo "清除环境"
     docker rm $(docker ps -aq) -f
     generateConfig
@@ -114,9 +116,9 @@ function chaincode(){
     # docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n myapp -l golang -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.member')"
     
     docker ps
-
+    
     sleep 3
-
+    
     # echo "调用链码"
     # docker exec cli peer chaincode invoke -o $ORDERER_ADDRESS -C $CHANNEL_NAME -n $CC_NAME -c '{"function":"storeDataHash","Args":["1","123456"]}'
     # docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n myapp -c '{"Args":["storeDataHash","1","123456"]}'
