@@ -1,5 +1,5 @@
-import { initFabricSDK } from "./fabric-sdk";
+import FabricSDK from "./fabric-sdk";
 
 export function initServices() {
-	initFabricSDK();
+	FabricSDK.init();
 }

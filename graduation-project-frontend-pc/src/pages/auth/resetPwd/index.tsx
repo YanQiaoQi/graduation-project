@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Steps, Form, Button } from 'antd';
 import AuthLayout from '../components/authLayout';
-import FormItem from '../components/FormItem';
+import FormItem from '../../../components/FormItem';
 import request from '../../../common/request';
-import { AUTH_URL } from '@/constant/url';
+import { URL } from '@/common/constant';
 import Container from '@/components/Container';
 
 interface ResetPwdProps {}
@@ -16,18 +16,18 @@ function ResetPwd({}: ResetPwdProps) {
     }, []);
 
     const resetPwd = useCallback((values) => {
-        request.post(AUTH_URL.resetPwd, {});
+        request.post(URL.AUTH.resetPwd, {});
     }, []);
 
     const items = useMemo(
         () => [
             <Form onFinish={nextStep}>
-                <FormItem.Email />
-                <FormItem.Captcha />
+                <FormItem.Input.Email />
+                <FormItem.Input.Captcha />
                 <FormItem.Submit>下一步</FormItem.Submit>
             </Form>,
             <Form onFinish={resetPwd}>
-                <FormItem.Password confirm />
+                <FormItem.Input.Password confirm />
                 <FormItem.Submit>确认</FormItem.Submit>
             </Form>,
         ],

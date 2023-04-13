@@ -1,13 +1,15 @@
 import classNames from 'classnames';
-import { ReactNode } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 import './index.less';
 
 interface ContainerProps {
+    className?: string;
     children?: ReactNode;
     expand?: boolean;
+    style?: CSSProperties;
     flex?: boolean;
     direction?: 'row' | 'column';
-    align?: 'space-between' | 'start';
+    align?: 'space-between' | 'start' | 'center';
 }
 
 function Container({
@@ -16,6 +18,8 @@ function Container({
     children,
     direction,
     align,
+    style,
+    className: customClassName,
 }: ContainerProps) {
     let isFlex = flex;
     let flexDirection = direction;
@@ -25,13 +29,17 @@ function Container({
         flexDirection = direction ?? 'row';
         justifyContent = align ?? 'start';
     }
-    const className = classNames({
+    const className = classNames(customClassName, {
         'container-expand': expand,
         'container-flex': isFlex,
         [`container-flex-direction-${flexDirection}`]: isFlex,
         [`container-flex-justify-content-${justifyContent}`]: isFlex,
     });
-    return <div className={className}>{children}</div>;
+    return (
+        <div className={className} style={style}>
+            {children}
+        </div>
+    );
 }
 
 export default Container;
