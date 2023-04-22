@@ -13,7 +13,7 @@ export function CORS(): RequestHandler {
 		);
 		res.header(
 			"Access-Control-Allow-Headers",
-			"Content-Type"
+			"Content-Type,Authorization"
 		);
 		res.header("Access-Control-Allow-Credentials", "true");
 		next();

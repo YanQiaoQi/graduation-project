@@ -33,8 +33,6 @@ export function FormItemUpload({
         },
         beforeUpload(file) {
             const { size, name } = file;
-            console.log(name);
-
             if (!type) {
                 message.error(`未指定存证类型`);
                 return AntdUpload.LIST_IGNORE;

@@ -14,6 +14,11 @@ export default defineConfig({
             routes: [
                 {
                     exact: 'true',
+                    path: '/',
+                    redirect: '/dashboard/personal/console',
+                },
+                {
+                    exact: 'true',
                     path: '/dashboard',
                     redirect: '/dashboard/personal/console',
                 },

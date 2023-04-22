@@ -34,6 +34,13 @@ export const CERTIFICATE = {
         IMAGE: 'image',
         WEBPAGE: 'webpage',
     },
+    TYPE_TO_TEXT: {
+        video: '视频',
+        audio: '音频',
+        document: '文档',
+        image: '图片',
+        webpage: '网页',
+    },
     TYPE_TO_ACCEPT: {
         video: 'video/*',
         audio: 'audio/*',

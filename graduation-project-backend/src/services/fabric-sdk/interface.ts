@@ -5,22 +5,27 @@ export type Message = string;
 
 export type Encryption = "RSA";
 
-// 起始次序，结束次序，加密方式
-// export type EncryptionItem = [number, number, Encryption];
+export type FabricRes = {
+	code: 1 | 0;
+	message: string;
+	data?: any;
+};
 
-// export type Certificate = {
-// 	// 原文信息
-// 	content: string;
-// 	encryptio: EncryptionItem[];
-// };
+export type Certificate = {
+	name: string;
+	type: string;
+	size: number;
+	description: string;
+	extension: string;
+	created: number;
+	last_updated: number;
+};
 
-export type CertificateItem = [Message, Encryption];
-
-export type Certificate = CertificateItem[];
+export type Certificates = Certificate[];
 
 export interface User {
 	password: String;
-	certificates: Certificate[];
+	certificates: Certificates;
 }
 
 export type Ledger = Record<Email, User>;

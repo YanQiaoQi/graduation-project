@@ -1,51 +1,99 @@
-import { useState, useCallback } from 'react';
-import { Space, Table, Form, Button, Card, DatePicker } from 'antd';
-import { navigateTo } from '@/common/utils';
-import FormItem from '@/components/FormItem';
-import { CERTIFICATE } from '@/common/constant';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+    Space,
+    Table,
+    Form,
+    Button,
+    Card,
+    DatePicker,
+    Popconfirm,
+    Input,
+    Select,
+} from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { showMessage } from '@/common/utils';
+import { CERTIFICATE, URL, CertificateType } from '@/common/constant';
+import request from '@/common/request';
+import dayjs from 'dayjs';
 
 const { Column } = Table;
 
 interface DataType {
     key: React.Key;
     name: string;
-    type: string;
-    time: number;
+    type: CertificateType;
+    created: number;
     size: number;
-    format: string[];
+    extension: string;
 }
 
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John',
-        type: 'Brown',
-        time: 32,
-        size: 32,
-        format: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        name: 'Jim',
-        type: 'Green',
-        time: 42,
-        size: 43,
-        format: ['loser'],
-    },
-    {
-        key: '3',
-        name: 'Joe',
-        type: 'Black',
-        time: 32,
-        size: 123,
-        format: ['cool', 'teacher'],
-    },
-];
-
 const CertificatesListPage: React.FC = () => {
-    const [tableData, setTableData] = useState(data);
-    const deleteCertificate = useCallback(() => {}, []);
-    const updateCertificate = useCallback(() => {}, []);
+    const [tableData, setTableData] = useState<DataType[]>([]);
+
+    const [stamp, forceUpdate] = useState(Date.now());
+
+    const allTableData = useRef<DataType[]>([]);
+
+    const [form] = Form.useForm();
+
+    useEffect(() => {
+        request.get(URL.CERTIFICATE).then((res) => {
+            allTableData.current = res.data;
+            setTableData(res.data);
+        });
+    }, [stamp]);
+
+    const deleteCertificate = useCallback(
+        (index) => () => {
+            request
+                .delete(`${URL.CERTIFICATE}/${index}`)
+                .then(showMessage)
+                .then(({ code }) => {
+                    if (code === 1) {
+                        forceUpdate(Date.now());
+                    }
+                });
+        },
+        [],
+    );
+
+    const dowloadCertificate = useCallback(
+        (name: string, created: number) => () => {
+            request
+                .get(`${URL.CERTIFICATE}/${name}/${created}`, {
+                    responseType: 'blob',
+                })
+                .then((res) => {
+                    console.log(res);
+                });
+        },
+        [],
+    );
+
+    const onFilter = useCallback(({ name, type, dateRange }) => {
+        if (name || type || dateRange)
+            setTableData((prevState) => {
+                return allTableData.current?.filter((file) => {
+                    if (name && name !== file.name) return false;
+                    else if (type && type !== '-1' && type !== file.type)
+                        return false;
+                    else if (
+                        dateRange &&
+                        (dayjs(dateRange[0]).isAfter(file.created) ||
+                            dayjs(dateRange[1]).isBefore(file.created))
+                    )
+                        return false;
+                    else return true;
+                });
+            });
+        else setTableData(allTableData.current);
+    }, []);
+
+    const onReset = useCallback(() => {
+        form.resetFields();
+        setTableData(allTableData.current);
+    }, []);
+
     return (
         <Card
             title="存证列表"
@@ -53,44 +101,106 @@ const CertificatesListPage: React.FC = () => {
                 <Button href="/dashboard/certificates/new">+ 新建存证</Button>
             }
         >
-            <Form layout="inline" style={{ marginBottom: 24 }}>
-                <FormItem.Select
-                    label="存证类型"
-                    name="type"
-                    items={CERTIFICATE.ITEMS}
-                />
-                <FormItem label="时间">
+            <Form
+                form={form}
+                layout="inline"
+                style={{ marginBottom: 24 }}
+                onFinish={onFilter}
+            >
+                <Form.Item label="存证类型" name="type">
+                    <Select
+                        defaultValue={'-1'}
+                        options={[
+                            { label: '全部', value: '-1' },
+                            ...CERTIFICATE.ITEMS,
+                        ]}
+                    ></Select>
+                </Form.Item>
+                <Form.Item label="时间" name="dateRange">
                     <DatePicker.RangePicker
                         showTime
                         style={{ maxWidth: 340 }}
                     />
-                </FormItem>
-                <FormItem.Input label="存證名稱" name={'name'} />
+                </Form.Item>
+                <Form.Item label="存证名称" name="name">
+                    <Input />
+                </Form.Item>
+                <Form.Item>
+                    <Button onClick={onReset}>reset</Button>
+                </Form.Item>
+                <Form.Item>
+                    <Button
+                        icon={<SearchOutlined />}
+                        type="primary"
+                        htmlType="submit"
+                    />
+                </Form.Item>
             </Form>
             <Table dataSource={tableData}>
                 <Column title="存证名称" dataIndex="name" key="name" />
-                <Column title="存证类型" dataIndex="type" key="type" />
-                <Column title="存证格式" dataIndex="format" key="format" />
-                <Column title="存储空间" dataIndex="size" key="size" />
-                <Column title="创建时间" dataIndex="time" key="time" />
-                <Column title="备注" key="description" />
+                <Column
+                    title="存证类型"
+                    dataIndex="type"
+                    key="type"
+                    render={(value: CertificateType) =>
+                        CERTIFICATE.TYPE_TO_TEXT[value]
+                    }
+                />
+                <Column
+                    title="存证格式"
+                    dataIndex="extension"
+                    key="extension"
+                />
+                <Column
+                    title="存储空间"
+                    dataIndex="size"
+                    key="size"
+                    render={(value: number) => `${value}b`}
+                />
+                <Column
+                    title="创建时间"
+                    dataIndex="created"
+                    key="created"
+                    render={(value: number) =>
+                        dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+                    }
+                />
+                <Column
+                    title="备注"
+                    dataIndex="description"
+                    key="description"
+                />
                 <Column
                     title="操作"
                     key="action"
-                    render={(_: any, record: DataType) => (
-                        <Space size="middle">
-                            <Button size="small" onClick={updateCertificate}>
-                                修改
-                            </Button>
-                            <Button
-                                size="small"
-                                onClick={deleteCertificate}
-                                danger
-                            >
-                                删除
-                            </Button>
-                        </Space>
-                    )}
+                    render={(value, record: DataType, index) => {
+                        const { name, extension, created } = record;
+                        const originalName = `${name}.${extension}`;
+                        return (
+                            <Space size="middle">
+                                <Button
+                                    size="small"
+                                    onClick={dowloadCertificate(
+                                        originalName,
+                                        created,
+                                    )}
+                                >
+                                    下载
+                                </Button>
+                                <Popconfirm
+                                    title="删除"
+                                    description={`确认删除存证 ${name} ?`}
+                                    onConfirm={deleteCertificate(index)}
+                                    okText="是"
+                                    cancelText="否"
+                                >
+                                    <Button size="small" danger>
+                                        删除
+                                    </Button>
+                                </Popconfirm>
+                            </Space>
+                        );
+                    }}
                 />
             </Table>
         </Card>

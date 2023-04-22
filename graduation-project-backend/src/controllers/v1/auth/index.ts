@@ -1,22 +1,28 @@
+import jwt from "jsonwebtoken";
 import { RequestHandler } from "../../../common/type";
-import FabricSDK from "../../../services/fabric-sdk";
+import * as FabricSDK from "../../../services/fabric-sdk";
 import emailService from "../../../services/email";
 import redis from "../../../services/redis";
 import Res from "../../../common/res";
+import {
+	expiresIn,
+	jwtSecretKey,
+} from "../../../common/constant";
 
 const getRandom6Num = () => {
 	return parseInt(String(Math.random() * 1000000));
 };
 
+// 登录
 export const loginByPwd: RequestHandler = async (
 	req,
 	res
 ) => {
 	const { email, password } = req?.body;
-	const { status, data } = await FabricSDK.get(email);
+	const { code, data } = await FabricSDK.get(email);
 
 	// 1. 邮箱未注册
-	if (status === 0) {
+	if (code === 0) {
 		res.status(200);
 		res.send(Res.fail("该邮箱未注册"));
 		return;
@@ -29,7 +35,15 @@ export const loginByPwd: RequestHandler = async (
 		return;
 	}
 
-	res.send(Res.success("密码正确"));
+	const token = jwt.sign({ email: email }, jwtSecretKey, {
+		expiresIn: `${expiresIn}s`,
+	});
+
+	res.send(
+		Res.success("登录成功", 200, {
+			token,
+		})
+	);
 };
 
 export const loginByCaptcha: RequestHandler = async (
@@ -51,23 +65,31 @@ export const loginByCaptcha: RequestHandler = async (
 		return;
 	}
 
-	res.send(Res.success("登录成功"));
+	const token = jwt.sign({ email: email }, jwtSecretKey, {
+		expiresIn: `${expiresIn}s`,
+	});
+
+	res.send(
+		Res.success("登录成功", 200, {
+			token,
+		})
+	);
 };
 
-// 增
+// 注册
 export const signup: RequestHandler = async (req, res) => {
 	const { email, password, captcha } = req?.body;
 
 	// 1. 邮箱已注册
-	const { status } = await FabricSDK.get(email);
-	if (status === 1) {
+	const { code } = await FabricSDK.get(email);
+	if (code === 1) {
 		res.send(Res.fail("该邮箱已注册"));
 		return;
 	}
 
 	// 2. 邮箱验证码错误
-	const code = await redis.get(email);
-	if (code !== captcha) {
+	const rightCaptcha = await redis.get(email);
+	if (rightCaptcha !== captcha) {
 		res.send(Res.fail("邮箱验证码错误"));
 		return;
 	}
@@ -76,7 +98,7 @@ export const signup: RequestHandler = async (req, res) => {
 		password,
 		certificates: [],
 	};
-	const { status: setStatus } = await FabricSDK.set(
+	const { code: setStatus } = await FabricSDK.set(
 		email,
 		user
 	);

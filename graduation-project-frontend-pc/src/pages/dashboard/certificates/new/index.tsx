@@ -18,7 +18,7 @@ function CertificatesNewPage() {
             })
             .then(showMessage)
             .then(() => {
-                // navigateTo('/certificates/list');
+                navigateTo('/dashboard/certificates/list');
             });
     }, []);
 
@@ -33,7 +33,6 @@ function CertificatesNewPage() {
                     wrapperCol={{ span: 14 }}
                     style={{ maxWidth: 800, minWidth: 800 }}
                 >
-                    <FormItem.Input required label="存证名称" name="name" />
                     <FormItem.Select
                         required
                         label="存证类型"

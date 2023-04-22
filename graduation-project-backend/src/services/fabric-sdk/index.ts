@@ -5,7 +5,7 @@ import {
 } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 import { ccp, walletPath, CA_DOMAIN } from "./common";
-import { User } from "./interface";
+import { Certificate, FabricRes, User } from "./interface";
 // import {
 // 	createCA,
 // 	getCA,
@@ -163,70 +163,145 @@ async function invoke({
 
 		const contract = network.getContract("myapp");
 
-		const res = await contract.submitTransaction(
+		const FabricRes = await contract.submitTransaction(
 			func,
 			...argus
 		);
 
-		console.log(res.toString("utf-8"));
+		console.log(FabricRes.toString("utf-8"));
 		console.log(`Transaction has been submitted`);
 
 		gateway.disconnect();
 
-		return res;
+		return FabricRes;
 	} catch (error) {
 		console.error(`Failed to submit transaction: ${error}`);
 		process.exit(1);
 	}
 }
 
-async function set(key: string, value: User) {
+export async function set(
+	key: string,
+	value: User
+): Promise<any> {
 	return invoke({
 		func: "storeDataHash",
 		argus: [key, JSON.stringify(value)],
 	})
 		.then(() => {
 			return {
-				status: 1,
+				code: 1,
 				message: "设置成功",
 			};
 		})
 		.catch((e) => {
 			return {
-				status: 0,
+				code: 0,
 				message: "设置失败",
 			};
 		});
 }
 
-async function get(key: string) {
+export async function get(key: string): Promise<any> {
 	return invoke({
 		func: "queryDataHash",
 		argus: [key],
 	})
-		.then((res) => {
-			if (res) {
+		.then((FabricRes) => {
+			if (FabricRes) {
 				const { DataHash } = JSON.parse(
-					res.toString("utf-8")
+					FabricRes.toString("utf-8")
 				);
 				return {
-					status: 1,
+					code: 1,
 					data: JSON.parse(DataHash),
 				};
 			}
 			return {
-				status: 0,
+				code: 0,
 				message: "未有该key的数据",
 				data: null,
 			};
 		})
 		.catch((e) => {
 			return {
-				status: 0,
+				code: 0,
 				message: e,
 				data: null,
 			};
 		});
+}
+
+export async function updateCertificates(
+	key: string,
+	certificates: Certificate[]
+): Promise<FabricRes> {
+	const { code, data } = await get(key);
+	if (code === 1) {
+		const user = data as User;
+		user.certificates.push(...certificates);
+		const { code } = await set(key, user);
+		if (code === 1) {
+			return {
+				code,
+				message: "存证更新成功",
+			};
+		} else {
+			return {
+				code,
+				message: "存证更新失败",
+			};
+		}
+	}
+	return {
+		code,
+		message: "该key不存在数据",
+	};
+}
+
+export async function deleteCertificates(
+	key: string,
+	index: number
+): Promise<FabricRes> {
+	const { code, data } = await get(key);
+	if (code === 1) {
+		const user = data as User;
+		user.certificates.splice(index, 1);
+		const { code } = await set(key, user);
+		if (code === 1) {
+			return {
+				code,
+				message: "存证删除成功",
+			};
+		} else {
+			return {
+				code,
+				message: "存证删除失败",
+			};
+		}
+	}
+	return {
+		code,
+		message: "该key不存在数据",
+	};
+}
+
+export async function getCertificates(
+	key: string
+): Promise<FabricRes> {
+	const { code, data } = await get(key);
+	if (code === 1) {
+		return {
+			code,
+			message: "存证查询成功",
+			data: data.certificates,
+		};
+	}
+	return {
+		code,
+		message: "该key不存在数据",
+		data: null,
+	};
 }
 
 // async function query() {
@@ -279,17 +354,19 @@ async function get(key: string) {
 // 	}
 // }
 
-async function init() {
+export async function init() {
 	const channel = "mychannel";
 	const chaincode = "myapp";
 	await enrollAdmain();
 	await registerUser(userId);
 }
 
-const FabricSDK = {
-	init,
-	set,
-	get,
-};
+// const FabricSDK = {
+// 	init,
+// 	set,
+// 	get,
+// 	updateCertificates,
+// 	getCertificates,
+// };
 
-export default FabricSDK;
+// export default FabricSDK;

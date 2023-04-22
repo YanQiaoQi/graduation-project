@@ -1,4 +1,5 @@
 import { message as AntdMessage, message } from 'antd';
+import { useState } from 'react';
 import request from './request';
 
 export function navigateTo(path: string) {
@@ -9,6 +10,7 @@ interface Result<T = any> {
     code: 0 | 1;
     message: string;
     payload: T;
+    token?: string;
 }
 
 type Handler = (value: any) => void;
@@ -29,7 +31,7 @@ export async function showMessage(res: Result) {
 }
 
 export const onAuthFormFinish =
-    (url: string, path: string): Handler =>
+    (url: string, path: string, cb?: (res: Result) => void): Handler =>
     (values) => {
         const messageKey = 'message';
         AntdMessage.open({
@@ -40,7 +42,8 @@ export const onAuthFormFinish =
         request
             .post<Result>(url, { data: values })
             .then(showMessage)
-            .then(() => {
+            .then((res) => {
+                cb?.(res);
                 navigateTo(path);
             })
             .catch((e) => {
@@ -63,4 +66,9 @@ export function getFormData(
         }
     }
     return formData;
+}
+
+export function useForceUpdate() {
+    let [value, setState] = useState(true);
+    return () => setState(!value);
 }
