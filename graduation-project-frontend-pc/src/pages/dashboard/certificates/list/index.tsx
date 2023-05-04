@@ -11,7 +11,7 @@ import {
     Select,
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { showMessage } from '@/common/utils';
+import { downloadFileByBlob, showMessage } from '@/common/utils';
 import { CERTIFICATE, URL, CertificateType } from '@/common/constant';
 import request from '@/common/request';
 import dayjs from 'dayjs';
@@ -64,7 +64,10 @@ const CertificatesListPage: React.FC = () => {
                     responseType: 'blob',
                 })
                 .then((res) => {
-                    console.log(res);
+                    downloadFileByBlob(res, name);
+                })
+                .catch((e) => {
+                    console.log(e);
                 });
         },
         [],
@@ -96,9 +99,9 @@ const CertificatesListPage: React.FC = () => {
 
     return (
         <Card
-            title="存证列表"
+            title="证据列表"
             extra={
-                <Button href="/dashboard/certificates/new">+ 新建存证</Button>
+                <Button href="/dashboard/certificates/new">+ 新建证据</Button>
             }
         >
             <Form
@@ -107,9 +110,8 @@ const CertificatesListPage: React.FC = () => {
                 style={{ marginBottom: 24 }}
                 onFinish={onFilter}
             >
-                <Form.Item label="存证类型" name="type">
+                <Form.Item label="证据类型" name="type" initialValue={'-1'}>
                     <Select
-                        defaultValue={'-1'}
                         options={[
                             { label: '全部', value: '-1' },
                             ...CERTIFICATE.ITEMS,
@@ -122,7 +124,7 @@ const CertificatesListPage: React.FC = () => {
                         style={{ maxWidth: 340 }}
                     />
                 </Form.Item>
-                <Form.Item label="存证名称" name="name">
+                <Form.Item label="证据名称" name="name">
                     <Input />
                 </Form.Item>
                 <Form.Item>
@@ -137,9 +139,9 @@ const CertificatesListPage: React.FC = () => {
                 </Form.Item>
             </Form>
             <Table dataSource={tableData}>
-                <Column title="存证名称" dataIndex="name" key="name" />
+                <Column title="证据名称" dataIndex="name" key="name" />
                 <Column
-                    title="存证类型"
+                    title="证据类型"
                     dataIndex="type"
                     key="type"
                     render={(value: CertificateType) =>
@@ -147,7 +149,7 @@ const CertificatesListPage: React.FC = () => {
                     }
                 />
                 <Column
-                    title="存证格式"
+                    title="证据格式"
                     dataIndex="extension"
                     key="extension"
                 />
@@ -189,7 +191,7 @@ const CertificatesListPage: React.FC = () => {
                                 </Button>
                                 <Popconfirm
                                     title="删除"
-                                    description={`确认删除存证 ${name} ?`}
+                                    description={`确认删除证据 ${name} ?`}
                                     onConfirm={deleteCertificate(index)}
                                     okText="是"
                                     cancelText="否"

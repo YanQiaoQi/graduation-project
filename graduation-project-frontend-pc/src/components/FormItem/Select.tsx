@@ -7,17 +7,19 @@ type ItemType = {
 };
 
 interface FormItemSelectProps extends FormItemProps {
+    type?: 'select' | 'radio';
     name: string;
     items: ItemType[];
 }
 
 export function FormItemSelect({
+    type = 'select',
     name,
     items,
     ...restProps
 }: FormItemSelectProps) {
     let children = <></>;
-    if (items.length < 5) {
+    if (items.length < 5 && type === 'radio') {
         children = (
             <Radio.Group>
                 {items.map(({ label, value }) => (

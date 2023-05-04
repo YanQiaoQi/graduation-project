@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
+import { useMemo, useEffect, FC } from 'react';
 import { Breadcrumb, Layout, Menu } from 'antd';
+import Container from '@/components/Container';
 import { navigateTo } from '@/common/utils';
-import { PAGE_ITEMS } from '@/common/constant';
+import { PAGE_ITEMS, URL } from '@/common/constant';
+import request from '@/common/request';
 import styles from './index.less';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const ConsolePage: React.FC = ({ children }) => {
-    
+const ConsolePage: FC = ({ children }) => {
     const path = useMemo(() => {
         const pathArr = location.pathname.split(`/`);
         pathArr.shift();
@@ -33,6 +34,10 @@ const ConsolePage: React.FC = ({ children }) => {
     const SiderSelectedKey = useMemo(() => path[path.length - 1], [path]);
 
     const prefixCls = useMemo(() => 'console-index', []);
+
+    useEffect(() => {
+        request.get(`${URL.USER}/isAuthorized`);
+    }, []);
 
     return (
         <Layout className={styles[`${prefixCls}-container`]}>
@@ -72,7 +77,15 @@ const ConsolePage: React.FC = ({ children }) => {
                             styles[`${prefixCls}-content-bottom-content`]
                         }
                     >
-                        {children}
+                        <Container
+                            className={
+                                styles[
+                                    `${prefixCls}-content-bottom-content-container`
+                                ]
+                            }
+                        >
+                            {children}
+                        </Container>
                     </Content>
                 </Layout>
             </Content>

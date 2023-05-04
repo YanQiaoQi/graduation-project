@@ -34,7 +34,7 @@ export function FormItemUpload({
         beforeUpload(file) {
             const { size, name } = file;
             if (!type) {
-                message.error(`未指定存证类型`);
+                message.error(`未指定证据类型`);
                 return AntdUpload.LIST_IGNORE;
             }
             const maxSize = CERTIFICATE.TYPE_TO_MAX_SIZE[type];

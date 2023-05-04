@@ -1,9 +1,14 @@
 import { message as AntdMessage, message } from 'antd';
-import { useState } from 'react';
 import request from './request';
 
 export function navigateTo(path: string) {
     location.pathname = path;
+}
+
+export function onNavigateTO(path: string) {
+    return function () {
+        location.pathname = path;
+    };
 }
 
 interface Result<T = any> {
@@ -68,7 +73,16 @@ export function getFormData(
     return formData;
 }
 
-export function useForceUpdate() {
-    let [value, setState] = useState(true);
-    return () => setState(!value);
+export function downloadFileByBlob(blob: Blob, filename: string) {
+    const blobURL = window.URL.createObjectURL(blob);
+    const eleLink = document.createElement('a');
+    eleLink.download = filename;
+    eleLink.style.display = 'none';
+    eleLink.href = blobURL;
+    // 触发点击
+    document.body.appendChild(eleLink);
+    eleLink.click();
+    // 然后移除
+    document.body.removeChild(eleLink);
+    window.URL.revokeObjectURL(blobURL);
 }

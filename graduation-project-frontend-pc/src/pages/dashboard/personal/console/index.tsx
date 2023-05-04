@@ -1,12 +1,9 @@
+import { Card } from 'antd';
 
-interface PersonalConsoleProps {
-    
+interface PersonalConsoleProps {}
+
+function PersonalConsole({}: PersonalConsoleProps) {
+    return <Card title="证据中心">PersonalConsole</Card>;
 }
 
-function PersonalConsole ({}:PersonalConsoleProps){
-    return (
-        <>PersonalConsole</>
-    )
-}
-
-export default PersonalConsole
+export default PersonalConsole;

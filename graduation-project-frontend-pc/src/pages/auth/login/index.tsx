@@ -8,11 +8,13 @@ import { onAuthFormFinish } from '@/common/utils';
 function LoginPage() {
     const onSignup = useCallback(
         (url: string) =>
-            onAuthFormFinish(url, '/console', ({ token }) => {
-                console.log(token);
-
-                localStorage.setItem('token', token!);
-            }),
+            onAuthFormFinish(
+                url,
+                '/dashboard/personal/console',
+                ({ token }) => {
+                    localStorage.setItem('token', token!);
+                },
+            ),
         [],
     );
 

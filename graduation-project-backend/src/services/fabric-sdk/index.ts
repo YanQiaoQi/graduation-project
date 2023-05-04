@@ -244,12 +244,12 @@ export async function updateCertificates(
 		if (code === 1) {
 			return {
 				code,
-				message: "存证更新成功",
+				message: "证据更新成功",
 			};
 		} else {
 			return {
 				code,
-				message: "存证更新失败",
+				message: "证据更新失败",
 			};
 		}
 	}
@@ -271,12 +271,12 @@ export async function deleteCertificates(
 		if (code === 1) {
 			return {
 				code,
-				message: "存证删除成功",
+				message: "证据删除成功",
 			};
 		} else {
 			return {
 				code,
-				message: "存证删除失败",
+				message: "证据删除失败",
 			};
 		}
 	}
@@ -293,7 +293,7 @@ export async function getCertificates(
 	if (code === 1) {
 		return {
 			code,
-			message: "存证查询成功",
+			message: "证据查询成功",
 			data: data.certificates,
 		};
 	}

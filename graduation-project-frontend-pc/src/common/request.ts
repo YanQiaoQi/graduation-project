@@ -1,22 +1,47 @@
 import request from 'umi-request';
+import { navigateTo } from './utils';
 
 request.interceptors.request.use((url, options) => {
-    const token = `Bearer ${localStorage.getItem('token')}`;
-    if (!token) {
+    // auth 不做处理
+    if (/^.*\/v1\/auth\/.*/.test(url)) {
         return {
             url,
-            options: options,
+            options,
         };
     }
+    console.log(/^.*\/v1\/auth\/.*/.test(url));
+    
+    // 非 auth 不传 token
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log('request');
+        navigateTo('/auth/login');
+        return {
+            url,
+            options,
+        };
+    }
+    // 非 auth 传 token
+    const jwt = `Bearer ${token}`;
     return {
         url,
         options: {
             ...options,
             headers: {
-                Authorization: token,
+                Authorization: jwt,
             },
         },
     };
+});
+
+request.interceptors.response.use(async (res) => {
+    try {
+        const { status } = await res.clone().json();
+        if (status === 401) {
+            navigateTo('/auth/login');
+        }
+    } catch {}
+    return res;
 });
 
 // request.use((ctx, next) => {

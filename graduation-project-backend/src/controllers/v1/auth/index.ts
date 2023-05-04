@@ -96,6 +96,9 @@ export const signup: RequestHandler = async (req, res) => {
 
 	const user = {
 		password,
+		info: {
+			created: Date.now(),
+		},
 		certificates: [],
 	};
 	const { code: setStatus } = await FabricSDK.set(
@@ -123,3 +126,5 @@ export const sendCaptchaEmail: RequestHandler = async (
 			res.send(Res.fail(e));
 		});
 };
+
+

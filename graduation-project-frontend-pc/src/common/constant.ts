@@ -15,6 +15,7 @@ export const URL = {
         resetPwd: `${BASIC_URL}/auth/resetPwd`,
     },
     CERTIFICATE: `${BASIC_URL}/certificate`,
+    USER: `${BASIC_URL}/user`,
 };
 
 // Certificate
@@ -79,6 +80,18 @@ export const CERTIFICATE = {
     ],
 };
 
+export const ENCRYPTION_ITEMS_MAP = {
+    video: [],
+    audio: [],
+    document: [],
+    image: [
+        {
+            label: 'AES',
+            value: 'AES',
+        },
+    ],
+};
+
 type Page = 'NAV' | 'SIDER';
 
 export const PAGE_ITEMS: Record<Page, ItemType[]> = {
@@ -100,11 +113,15 @@ export const PAGE_ITEMS: Record<Page, ItemType[]> = {
                     key: `info`,
                     label: `基本信息`,
                 },
+                // {
+                //     key: `security`,
+                //     label: `安全中心`,
+                // },
             ],
         },
         {
             key: `certificates`,
-            label: `存证中心`,
+            label: `证据中心`,
             icon: React.createElement(LaptopOutlined),
             children: [
                 {
@@ -113,11 +130,11 @@ export const PAGE_ITEMS: Record<Page, ItemType[]> = {
                 },
                 {
                     key: `new`,
-                    label: `新建存证`,
+                    label: `新建证据`,
                 },
                 {
                     key: `list`,
-                    label: `存证列表`,
+                    label: `证据列表`,
                 },
             ],
         },

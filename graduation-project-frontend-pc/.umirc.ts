@@ -41,6 +41,10 @@ export default defineConfig({
                     component: '@/pages/dashboard/personal/info',
                 },
                 {
+                    path: '/dashboard/personal/security',
+                    component: '@/pages/dashboard/personal/security',
+                },
+                {
                     path: '/dashboard/certificates/guide',
                     component: '@/pages/dashboard/certificates/guide',
                 },
