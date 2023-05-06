@@ -16,9 +16,9 @@ export const ccpPath = path.resolve(
 	"connection-org1.json"
 );
 
-export const ccp = getCcpAdaptedWSL(ccpPath);
-
 export const walletPath = path.resolve(__dirname, "wallet");
+
+export const ccp = getCcpAdaptedWSL(ccpPath);
 
 console.log(`Wallet path: ${walletPath}`);
 

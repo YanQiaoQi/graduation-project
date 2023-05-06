@@ -90,6 +90,16 @@ export const ENCRYPTION_ITEMS_MAP = {
             value: 'AES',
         },
     ],
+    text: [
+        {
+            label: '明文',
+            value: 'clear',
+        },
+        {
+            label: 'AES',
+            value: 'AES',
+        },
+    ],
 };
 
 type Page = 'NAV' | 'SIDER';

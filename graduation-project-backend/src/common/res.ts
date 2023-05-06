@@ -17,6 +17,7 @@ export const Res = {
 			data,
 		};
 	},
+	
 	success: (
 		message: string,
 		status = 200,

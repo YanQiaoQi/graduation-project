@@ -4,14 +4,18 @@ import {
 } from "express";
 import { Result } from "./res";
 
-export type RequestHandler<T = any> = ExpressRequestHandler<
+export type RequestHandler<
+	resBody = Result<any>,
+	T = any
+> = ExpressRequestHandler<
 	Record<string, string>,
-	Result,
+	resBody,
 	T
 >;
 
-export type ErrorRequestHandler<T = any> = ExpressErrorRequestHandler<
-	Record<string, string>,
-	Result,
-	T
->;
+export type ErrorRequestHandler<T = any> =
+	ExpressErrorRequestHandler<
+		Record<string, string>,
+		Result,
+		T
+	>;

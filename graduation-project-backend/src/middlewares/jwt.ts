@@ -3,7 +3,7 @@ import {
 	ErrorRequestHandler,
 } from "../common/type";
 import { expressjwt } from "express-jwt";
-import { jwtSecretKey } from "../common/constant";
+import { jwtSecretKey } from "../services/redis/common";
 import Res from "../common/res";
 
 export function JWT(): RequestHandler {

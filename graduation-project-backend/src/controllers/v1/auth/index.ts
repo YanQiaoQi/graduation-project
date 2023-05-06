@@ -7,7 +7,8 @@ import Res from "../../../common/res";
 import {
 	expiresIn,
 	jwtSecretKey,
-} from "../../../common/constant";
+} from "../../../services/redis/common";
+import { User } from "../../../services/fabric-sdk/interface";
 
 const getRandom6Num = () => {
 	return parseInt(String(Math.random() * 1000000));
@@ -94,10 +95,19 @@ export const signup: RequestHandler = async (req, res) => {
 		return;
 	}
 
-	const user = {
+	const user:User = {
 		password,
 		info: {
 			created: Date.now(),
+		},
+		columnEncryption: {
+			name: "clear",
+			type: "clear",
+			encryption: "clear",
+			created: "clear",
+			size: "clear",
+			description: "clear",
+			extension: "clear",
 		},
 		certificates: [],
 	};
@@ -126,5 +136,3 @@ export const sendCaptchaEmail: RequestHandler = async (
 			res.send(Res.fail(e));
 		});
 };
-
-

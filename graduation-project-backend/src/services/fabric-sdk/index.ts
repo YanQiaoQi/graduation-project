@@ -5,13 +5,12 @@ import {
 } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 import { ccp, walletPath, CA_DOMAIN } from "./common";
-import { Certificate, FabricRes, User } from "./interface";
-// import {
-// 	createCA,
-// 	getCA,
-// 	getGateway,
-// 	getWallet,
-// } from "./common";
+import {
+	Certificate,
+	ColumnEncryption,
+	FabricRes,
+	User,
+} from "./interface";
 
 const userId = "appUser";
 
@@ -168,7 +167,6 @@ async function invoke({
 			...argus
 		);
 
-		console.log(FabricRes.toString("utf-8"));
 		console.log(`Transaction has been submitted`);
 
 		gateway.disconnect();
@@ -291,16 +289,47 @@ export async function getCertificates(
 ): Promise<FabricRes> {
 	const { code, data } = await get(key);
 	if (code === 1) {
+		const columnEncryption = data?.columnEncryption ?? {
+			name: "clear",
+			type: "clear",
+			encryption: "clear",
+			created: "clear",
+			size: "clear",
+			description: "clear",
+			extension: "clear",
+		};
 		return {
 			code,
 			message: "证据查询成功",
-			data: data.certificates,
+			data: [columnEncryption, ...data.certificates],
 		};
 	}
 	return {
 		code,
 		message: "该key不存在数据",
 		data: null,
+	};
+}
+
+export async function updateColumnEncryption(
+	key: string,
+	columnEncryption: ColumnEncryption
+): Promise<FabricRes> {
+	const { code, data } = await get(key);
+	if (code === 1) {
+		const user = data as User;
+		user.columnEncryption = columnEncryption;
+		const { code } = await set(key, user);
+		if (code === 1) {
+			return {
+				code,
+				message: "更新成功",
+			};
+		}
+	}
+	return {
+		code,
+		message: "更新失败",
 	};
 }
 
@@ -360,13 +389,3 @@ export async function init() {
 	await enrollAdmain();
 	await registerUser(userId);
 }
-
-// const FabricSDK = {
-// 	init,
-// 	set,
-// 	get,
-// 	updateCertificates,
-// 	getCertificates,
-// };
-
-// export default FabricSDK;

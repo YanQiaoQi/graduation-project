@@ -35,4 +35,15 @@ certificateRouter.get(
 	certificateControllers.sendCertificate
 );
 
+//
+certificateRouter.post(
+	"/encrypt",
+	certificateControllers.encryptCertificate
+);
+
+certificateRouter.get(
+	"/decrypt/:encryption/:data",
+	certificateControllers.decryptCertificate
+);
+
 export default certificateRouter;

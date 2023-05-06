@@ -21,7 +21,7 @@ function GuideSteps() {
                 icon: createElement(PlayCircleOutlined),
             },
             {
-                title: '数据列表',
+                title: '证据列表',
                 icon: createElement(TableOutlined),
             },
         ],
@@ -30,7 +30,7 @@ function GuideSteps() {
 
     const currentToHref = useMemo(
         () => [
-            '/',
+            // '/',
             '/dashboard/certificates/new',
             '/dashboard/certificates/list',
         ],
@@ -48,7 +48,7 @@ function GuideSteps() {
             current={current}
             items={stepsItems}
             onChange={onStepChange}
-            style={{ margin: "24px 0 48px 0" }}
+            style={{ margin: '24px 0 48px 0' }}
         />
     );
 }

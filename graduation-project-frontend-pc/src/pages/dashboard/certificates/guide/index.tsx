@@ -2,12 +2,10 @@ import { Card } from 'antd';
 import GuideSteps from './GuideSteps';
 import GuideIntroduction from './GuideIntroduction';
 
-interface CertificatesGuidePageProps {}
-
-function CertificatesGuidePage({}: CertificatesGuidePageProps) {
+function CertificatesGuidePage() {
     return (
         <Card title="操作引导">
-            <GuideSteps />
+            {/* <GuideSteps /> */}
             <GuideIntroduction />
         </Card>
     );
