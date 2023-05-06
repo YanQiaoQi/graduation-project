@@ -3,7 +3,7 @@ export type Email = string;
 // 报文
 export type Message = string;
 
-export type Encryption = "RSA" | "clear";
+export type Encryption = "clear" | "AES";
 
 export type FabricRes = {
 	code: 1 | 0;
@@ -22,17 +22,14 @@ export type Certificate = {
 	last_updated: number;
 };
 
+export type KeyofCertificate = keyof Certificate;
+
 export type Certificates = Certificate[];
 
-export type ColumnEncryption = {
-	name: Encryption;
-	type: Encryption;
-	size: Encryption;
-	encryption: Encryption;
-	description: Encryption;
-	extension: Encryption;
-	created: Encryption;
-};
+export type ColumnEncryption = Record<
+	KeyofCertificate,
+	Encryption
+>;
 
 export type UserInfo = {
 	created: number;

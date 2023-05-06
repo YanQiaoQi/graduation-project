@@ -1,12 +1,125 @@
-import { useState, useCallback } from 'react';
-import { Space, Form, Button, Popconfirm } from 'antd';
-import { downloadFileByBlob, showMessage } from '@/common/utils';
-import { CERTIFICATE, URL, CertificateType } from '@/common/constant';
+import { useState, useCallback, FC } from 'react';
+import { Space, Form, Button, Popconfirm, Table, Tooltip, Modal } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
+import { downloadFileByBlob, formatByte, showMessage } from '@/common/utils';
+import {
+    CERTIFICATE,
+    URL,
+    CertificateType,
+    ENCRYPTION_ITEMS_MAP,
+} from '@/common/constant';
 import request from '@/common/request';
 import dayjs from 'dayjs';
-import { ColumnsType } from 'antd/es/table';
-import { DataType } from '.';
-import Table from './EditableTable';
+import { DataType, Encryption } from '.';
+import FormItem from '@/components/FormItem';
+import Container from '@/components/Container';
+
+const valueToLabel: Record<string, string> = {
+    clear: '明文',
+};
+
+interface EditableCellProps<T = any> extends React.HTMLAttributes<HTMLElement> {
+    editing: boolean;
+    dataIndex: string;
+    title: any;
+    index: number;
+    record: T;
+    editable: boolean;
+    children: React.ReactNode;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+    editing,
+    index,
+    dataIndex,
+    title,
+    record,
+    children,
+    editable,
+    ...restProps
+}) => {
+    const encryptionStyle = index === 0 ? { backgroundColor: '#fafafa' } : {};
+    return (
+        <td {...restProps} style={encryptionStyle}>
+            {editing && editable ? (
+                <FormItem.Select
+                    name={dataIndex}
+                    style={{ margin: 0 }}
+                    rules={[
+                        {
+                            required: true,
+                            message: `Please Input ${title}!`,
+                        },
+                    ]}
+                    items={ENCRYPTION_ITEMS_MAP.text}
+                />
+            ) : (
+                children
+            )}
+        </td>
+    );
+};
+
+interface EncryptedCellProps {
+    dataIndex: keyof DataType;
+    timeout?: number;
+    children: string;
+    onClick: () => Promise<any>;
+}
+
+const EncryptedCell: FC<EncryptedCellProps> = ({
+    dataIndex,
+    timeout = 3000,
+    children,
+    onClick,
+}) => {
+    const cipher = `${children?.substring?.(0, 5)}...`;
+
+    const [content, setContent] = useState(cipher);
+
+    const [isDecrypted, setIsDecrypted] = useState(false);
+
+    const mergedOnClick = useCallback(() => {
+        setIsDecrypted(true);
+        onClick().then(({ data }) => {
+            setContent(format(dataIndex)(data));
+            setTimeout(() => {
+                setIsDecrypted(false);
+                setContent(cipher);
+            }, timeout);
+        });
+    }, [onClick]);
+
+    return (
+        <Container>
+            <Tooltip title={content}>{content}</Tooltip>
+            <Button
+                type="link"
+                icon={<EyeOutlined />}
+                disabled={isDecrypted}
+                onClick={mergedOnClick}
+            />
+        </Container>
+    );
+};
+
+function format(type: keyof DataType) {
+    switch (type) {
+        case 'created': {
+            return (value: string) =>
+                dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
+        }
+        case 'type': {
+            return (value: CertificateType) => CERTIFICATE.TYPE_TO_TEXT[value];
+        }
+        case 'size': {
+            return (value: string) => formatByte(parseInt(value));
+        }
+        default: {
+            return (value: any) => value;
+        }
+    }
+}
 
 interface CertificateTableProps {
     data: DataType[];
@@ -18,6 +131,8 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
     const [editingKey, setEditingKey] = useState<string>('');
 
     const [form] = Form.useForm();
+
+    const columnEncryption = data[0];
 
     const deleteCertificate = useCallback(
         (index) => () => {
@@ -34,9 +149,9 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
     );
 
     const dowloadCertificate = useCallback(
-        (name: string, created: number) => () => {
+        (index: number, name: string, encryption: Encryption) => () => {
             request
-                .get(`${URL.CERTIFICATE}/${name}/${created}`, {
+                .get(`${URL.CERTIFICATE}/${encryption}/${index}`, {
                     responseType: 'blob',
                 })
                 .then((res) => {
@@ -72,13 +187,50 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
         setEditingKey('');
     }, []);
 
-    const columns: ColumnsType<DataType> = [
+    const onDecrypt = useCallback(
+        (dataIndex: keyof DataType, value: string) => () => {
+            const encryption = columnEncryption[dataIndex];
+            const cipher = encodeURIComponent(value);
+            return request.get(
+                `${URL.CERTIFICATE}/decrypt/${encryption}/${cipher}`,
+            );
+        },
+        [columnEncryption],
+    );
+
+    const renderContent =
+        (dataIndex: keyof DataType) =>
+        (render: Function) =>
+        (value: string, record: DataType, index: number) => {
+            const isEncrypted = columnEncryption[dataIndex] !== 'clear';
+            // 列加密选择
+            if (index === 0) {
+                return valueToLabel[value] ?? value;
+            }
+
+            // 已加密：显示密文
+            if (isEncrypted) {
+                return (
+                    <EncryptedCell
+                        dataIndex={dataIndex}
+                        onClick={onDecrypt(dataIndex, value)}
+                    >
+                        {value}
+                    </EncryptedCell>
+                );
+            }
+            // 未加密：显示格式化数据
+            else {
+                return render(value, record, index);
+            }
+        };
+
+    const columns = [
         {
             title: '证据名称',
             dataIndex: 'name',
             key: 'name',
             ellipsis: true,
-            // @ts-ignore
             editable: true,
         },
         {
@@ -86,16 +238,13 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
             dataIndex: 'type',
             key: 'type',
             ellipsis: true,
-            // @ts-ignore
             editable: true,
-            render: (value: CertificateType) => CERTIFICATE.TYPE_TO_TEXT[value],
         },
         {
             title: '加密类型',
             dataIndex: 'encryption',
             key: 'encryption',
             ellipsis: true,
-            // @ts-ignore
             editable: true,
         },
         {
@@ -103,7 +252,6 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
             dataIndex: 'extension',
             key: 'extension',
             ellipsis: true,
-            // @ts-ignore
             editable: true,
         },
         {
@@ -111,32 +259,26 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
             dataIndex: 'size',
             key: 'size',
             ellipsis: true,
-            // @ts-ignore
             editable: true,
-            render: (value: string) => `${value}b`,
         },
         {
             title: '创建时间',
             dataIndex: 'created',
             key: 'created',
             // ellipsis: true,
-            // @ts-ignore
             editable: true,
-            render: (value: string) =>
-                dayjs(value).format('YYYY-MM-DD HH:mm:ss'),
         },
         {
             title: '备注',
             dataIndex: 'description',
             key: 'description',
             // ellipsis: true,
-            // @ts-ignore
             editable: true,
         },
         {
             title: '操作',
             key: 'action',
-            render: (value, record, index) => {
+            render: (value: any, record: DataType, index: number) => {
                 // 加密选择行
                 if (index === 0) {
                     // 正在修改
@@ -168,20 +310,24 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
                     }
                 }
                 // 数据展示行
-                const { name, extension, created } = record;
+                const { name, extension, encryption } = record;
                 const originalName = `${name}.${extension}`;
                 return (
                     <Space size="middle">
                         <Button
                             size="small"
-                            onClick={dowloadCertificate(originalName, created)}
+                            onClick={dowloadCertificate(
+                                index - 1,
+                                originalName,
+                                encryption,
+                            )}
                         >
                             下载
                         </Button>
                         <Popconfirm
                             title="删除"
                             description={`确认删除证据 ${name} ?`}
-                            onConfirm={deleteCertificate(index)}
+                            onConfirm={deleteCertificate(index - 1)}
                             okText="是"
                             cancelText="否"
                         >
@@ -195,14 +341,32 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
         },
     ];
 
+    const mergedColumns = columns?.map((col) => {
+        const dataIndex = col.dataIndex as keyof DataType;
+        return {
+            render: renderContent(dataIndex)(format(dataIndex)),
+            ...col,
+            onCell: (record: DataType, index?: number) => ({
+                record,
+                dataIndex,
+                title: dataIndex,
+                index,
+                editable: col.editable,
+                editing: record.name === editingKey,
+            }),
+        };
+    });
+
     return (
         <Form form={form}>
             <Table
-                keyProp="name"
-                editingKey={editingKey}
-                columns={columns}
+                columns={mergedColumns}
                 dataSource={data}
-                columnEncryption={data[0]}
+                components={{
+                    body: {
+                        cell: EditableCell,
+                    },
+                }}
             />
         </Form>
     );

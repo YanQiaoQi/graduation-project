@@ -311,6 +311,25 @@ export async function getCertificates(
 	};
 }
 
+export async function getCertificate(
+	key: string,
+	index: number
+): Promise<FabricRes> {
+	const { code, data } = await get(key);
+	if (code === 1) {
+		return {
+			code,
+			message: "证据查询成功",
+			data: data.certificates[index],
+		};
+	}
+	return {
+		code,
+		message: "该key不存在数据",
+		data: null,
+	};
+}
+
 export async function updateColumnEncryption(
 	key: string,
 	columnEncryption: ColumnEncryption

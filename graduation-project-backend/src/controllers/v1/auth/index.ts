@@ -95,7 +95,7 @@ export const signup: RequestHandler = async (req, res) => {
 		return;
 	}
 
-	const user:User = {
+	const user: User = {
 		password,
 		info: {
 			created: Date.now(),
@@ -108,6 +108,7 @@ export const signup: RequestHandler = async (req, res) => {
 			size: "clear",
 			description: "clear",
 			extension: "clear",
+			last_updated: "clear",
 		},
 		certificates: [],
 	};

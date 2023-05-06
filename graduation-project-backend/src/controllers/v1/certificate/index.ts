@@ -1,11 +1,8 @@
 import path from "path";
 import {
-	decrypt,
 	writeEncryptedFile,
 	splitFileName,
-	encryptFile,
-	encryptText,
-	decryptStr,
+	cryptography,
 } from "../../../common/utils";
 import { RequestHandler } from "../../../common/type";
 import { Res, Result } from "../../../common/res";
@@ -14,6 +11,7 @@ import {
 	NewCertificateReqBody,
 } from "./interface";
 import {
+	Certificate,
 	Certificates,
 	User,
 } from "../../../services/fabric-sdk/interface";
@@ -27,6 +25,9 @@ export const newCertificate: RequestHandler<
 	// @ts-ignore
 	const email = req.auth.email;
 	const files = req?.files as Express.Multer.File[];
+	const { data } = await FabricSDK.get(email);
+	const user = data as User;
+	const columnEncryption = user.columnEncryption;
 
 	if (Number(files?.length) <= 0) {
 		response.send(Res.fail("上传文件失败"));
@@ -38,6 +39,8 @@ export const newCertificate: RequestHandler<
 		({ buffer, originalname, size }) => {
 			const [name, extension] = splitFileName(originalname);
 			const created = Date.now();
+			console.log(created);
+
 			const last_updated = created;
 			writeEncryptedFile(
 				path.resolve(
@@ -46,7 +49,7 @@ export const newCertificate: RequestHandler<
 				buffer,
 				encryption
 			);
-			return {
+			const certificate: Certificate = {
 				name,
 				size,
 				extension,
@@ -56,6 +59,11 @@ export const newCertificate: RequestHandler<
 				created,
 				last_updated,
 			};
+			cryptography.encrypt.certificate(
+				certificate,
+				columnEncryption
+			);
+			return certificate;
 		}
 	);
 
@@ -103,12 +111,23 @@ export const sendCertificate: RequestHandler<
 > = async (req, response) => {
 	// @ts-ignore
 	const email = req.auth.email;
-	const { name, created } = req.params;
-	const absolutePath = path.resolve(
-		`upload/${email}-${created}-${name}`
+	const { encryption, index } = req.params;
+	const { data } = await FabricSDK.get(email);
+	const user = data as User;
+	const certificate = user.certificates[parseInt(index)];
+	cryptography.decrypt.certificate(
+		certificate,
+		user.columnEncryption
 	);
-	const data = await decrypt(absolutePath, "AES");
-	response.send(data);
+	const { created, name, extension } = certificate;
+	const absolutePath = path.resolve(
+		`upload/${email}-${created}-${name}.${extension}`
+	);
+	const res = await cryptography.decrypt.file(
+		encryption as Encryption,
+		absolutePath
+	);
+	response.send(res);
 };
 
 export const encryptCertificate: RequestHandler = async (
@@ -130,27 +149,13 @@ export const encryptCertificate: RequestHandler = async (
 		extension: "clear",
 	};
 	user.columnEncryption = columnEncryption;
-	for (let key in columnEncryption) {
-		if (columnEncryption.hasOwnProperty(key)) {
-			// @ts-ignore
-			const prevEncryption = prevColumnEncryption?.[key];
-			const encryption = columnEncryption[key];
-			if (
-				encryption === "clear" ||
-				prevEncryption === encryption
-			) {
-				continue;
-			}
-			user.certificates.forEach((certificate) => {
-				// @ts-ignore
-				certificate[key] = encryptText(
-					// @ts-ignore
-					certificate[key],
-					encryption
-				);
-			});
-		}
-	}
+	user.certificates.forEach((certificate) => {
+		cryptography.encrypt.certificate(
+			certificate,
+			columnEncryption,
+			prevColumnEncryption
+		);
+	});
 	await FabricSDK.set(email, user);
 	response.send({
 		status: 200,
@@ -167,7 +172,7 @@ export const decryptCertificate: RequestHandler = async (
 	const email = req.auth.email;
 	const { encryption, data } = req.params;
 	// @ts-ignore
-	const res = decryptStr(data, encryption);
+	const res = cryptography.decrypt.text(encryption, data);
 	response.status(200);
 	response.send({ status: 200, code: 1, data: res });
 };

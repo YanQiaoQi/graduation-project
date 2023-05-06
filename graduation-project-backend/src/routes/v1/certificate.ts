@@ -31,7 +31,7 @@ certificateRouter.get(
 
 // 查
 certificateRouter.get(
-	"/:name/:created",
+	"/:encryption/:index",
 	certificateControllers.sendCertificate
 );
 

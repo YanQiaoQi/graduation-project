@@ -1,6 +1,6 @@
 import { File } from "buffer";
 
-export type Encryption = "AES";
+export type Encryption = "AES" | "clear";
 
 export interface NewCertificateReqBody {
 	name: string;
