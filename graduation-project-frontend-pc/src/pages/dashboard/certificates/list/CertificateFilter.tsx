@@ -1,73 +1,57 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-    Space,
-    Table,
-    Form,
-    Button,
-    Card,
-    DatePicker,
-    Popconfirm,
-    Input,
-    Select,
-} from 'antd';
+import {  useCallback } from 'react';
+import { Form, Button, DatePicker, Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { downloadFileByBlob, showMessage } from '@/common/utils';
-import {
-    CERTIFICATE,
-    URL,
-    CertificateType,
-    ENCRYPTION_ITEMS_MAP,
-} from '@/common/constant';
-import request from '@/common/request';
-import FormItem from '@/components/FormItem';
+import { CERTIFICATE } from '@/common/constant';
 import dayjs from 'dayjs';
-import { ColumnsType } from 'antd/es/table';
 import { DataType } from '.';
 interface CertificateFilterProps {
     data: DataType[];
-    onChange: any;
+    setData: any;
 }
 
-function CertificateFilter({ data, onChange }: CertificateFilterProps) {
+function CertificateFilter({ data, setData }: CertificateFilterProps) {
     const [form] = Form.useForm();
-    
-    const onFilter = useCallback(({ name, type, dateRange }) => {
-        if (name || type || dateRange) {
-            const newData = data?.filter((file) => {
-                // 名字不符合
-                if (name && name !== file.name) {
-                    console.log(file, '名字不符合');
 
-                    return false;
-                }
-                // 类型不符合
-                else if (type && type !== '-1' && type !== file.type) {
-                    console.log(file, '类型不符合');
-                    return false;
-                }
-                // 时间不符合
-                else if (
-                    dateRange &&
-                    (dayjs(dateRange[0]).isAfter(file.created) ||
-                        dayjs(dateRange[1]).isBefore(file.created))
-                ) {
-                    console.log(file, '时间不符合');
-                    return false;
-                }
-                // 符合条件
-                else {
-                    return true;
-                }
-            });
-            onChange(newData);
-        } else {
-            onChange(data);
-        }
-    }, [data]);
+    const onFilter = useCallback(
+        ({ name, type, dateRange }) => {
+            if (name || type || dateRange) {
+                const newData = data?.filter((file) => {
+                    // 名字不符合
+                    if (name && name !== file.name) {
+                        console.log(file, '名字不符合');
+
+                        return false;
+                    }
+                    // 类型不符合
+                    else if (type && type !== '-1' && type !== file.type) {
+                        console.log(file, '类型不符合');
+                        return false;
+                    }
+                    // 时间不符合
+                    else if (
+                        dateRange &&
+                        (dayjs(dateRange[0]).isAfter(file.created) ||
+                            dayjs(dateRange[1]).isBefore(file.created))
+                    ) {
+                        console.log(file, '时间不符合');
+                        return false;
+                    }
+                    // 符合条件
+                    else {
+                        return true;
+                    }
+                });
+                setData(newData);
+            } else {
+                setData(data);
+            }
+        },
+        [data],
+    );
 
     const onReset = useCallback(() => {
         form.resetFields();
-        onChange(data);
+        setData(data);
     }, [data]);
 
     return (

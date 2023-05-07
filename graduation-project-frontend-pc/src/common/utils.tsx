@@ -1,4 +1,4 @@
-import { message as AntdMessage, message } from 'antd';
+import { message as AntdMessage } from 'antd';
 import request from './request';
 
 export function navigateTo(path: string) {
@@ -20,12 +20,8 @@ interface Result<T = any> {
 
 type Handler = (value: any) => void;
 
-message.config({
-    maxCount: 1,
-});
-
 export async function showMessage(res: Result) {
-    const { code, message } = res;
+    const { code, message } = res ?? { code: 1, message: '成功' };
     const messageType = code ? 'success' : 'error';
     const messageDuration = code ? 1 : 3;
     return AntdMessage.open({
@@ -99,5 +95,3 @@ export const formatByte = (size: number) => {
     if (size < pow1024(4)) return (size / pow1024(3)).toFixed(2) + ' GB';
     return (size / pow1024(4)).toFixed(2) + ' TB';
 };
-
-

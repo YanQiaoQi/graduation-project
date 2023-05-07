@@ -29,9 +29,9 @@ certificateRouter.get(
 	certificateControllers.getCertificate
 );
 
-// 查
+// 下载
 certificateRouter.get(
-	"/:encryption/:index",
+	"/:index",
 	certificateControllers.sendCertificate
 );
 
@@ -41,7 +41,7 @@ certificateRouter.post(
 	certificateControllers.encryptCertificate
 );
 
-certificateRouter.get(
+certificateRouter.post(
 	"/decrypt/:encryption/:data",
 	certificateControllers.decryptCertificate
 );

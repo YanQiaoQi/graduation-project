@@ -82,6 +82,8 @@ export const deleteCertificate: RequestHandler = async (
 	// @ts-ignore
 	const email = req.auth.email;
 	const index = req.params.index;
+	const { password } = req.body;
+
 	const res = await FabricSDK.deleteCertificates(
 		email,
 		parseInt(index)
@@ -111,7 +113,7 @@ export const sendCertificate: RequestHandler<
 > = async (req, response) => {
 	// @ts-ignore
 	const email = req.auth.email;
-	const { encryption, index } = req.params;
+	const { index } = req.params;
 	const { data } = await FabricSDK.get(email);
 	const user = data as User;
 	const certificate = user.certificates[parseInt(index)];
@@ -119,7 +121,8 @@ export const sendCertificate: RequestHandler<
 		certificate,
 		user.columnEncryption
 	);
-	const { created, name, extension } = certificate;
+	const { created, name, extension, encryption } =
+		certificate;
 	const absolutePath = path.resolve(
 		`upload/${email}-${created}-${name}.${extension}`
 	);
@@ -160,7 +163,10 @@ export const encryptCertificate: RequestHandler = async (
 	response.send({
 		status: 200,
 		code: 1,
-		data: [columnEncryption, ...user.certificates],
+		data: {
+			columnEncryption,
+			certificates: user.certificates,
+		},
 	});
 };
 
@@ -171,8 +177,22 @@ export const decryptCertificate: RequestHandler = async (
 	// @ts-ignore
 	const email = req.auth.email;
 	const { encryption, data } = req.params;
+	const { password } = req.body;
+	const fabricRes = await FabricSDK.isAuthorized(
+		email,
+		password
+	);
+
+	if (fabricRes.code === 0) {
+		response.send(Res.create(fabricRes));
+		return;
+	}
 	// @ts-ignore
 	const res = cryptography.decrypt.text(encryption, data);
-	response.status(200);
-	response.send({ status: 200, code: 1, data: res });
+	response.send({
+		status: 200,
+		code: 1,
+		data: res,
+		message: "鉴权成功",
+	});
 };

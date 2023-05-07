@@ -1,12 +1,13 @@
 import { Form, Input } from 'antd';
+import { FormItemProps } from 'antd/es/form/FormItem';
 import { Fragment, useMemo } from 'react';
 import styles from '../index.less';
 
-interface FormItemPwdProps {
+interface FormItemPwdProps extends FormItemProps {
     confirm?: boolean;
 }
 
-export function FormItemPwd({ confirm }: FormItemPwdProps) {
+export function FormItemPwd({ confirm, ...restProps }: FormItemPwdProps) {
     const pwdRules = useMemo(
         () => [
             {
@@ -53,7 +54,7 @@ export function FormItemPwd({ confirm }: FormItemPwdProps) {
 
     return (
         <Fragment>
-            <Form.Item name="password" rules={pwdRules}>
+            <Form.Item name="password" rules={pwdRules} {...restProps}>
                 <Input.Password
                     className={styles['form-item-input']}
                     placeholder="请输入密码"

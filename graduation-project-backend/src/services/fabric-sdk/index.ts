@@ -230,6 +230,25 @@ export async function get(key: string): Promise<any> {
 		});
 }
 
+export async function isAuthorized(
+	key: string,
+	password: string
+): Promise<FabricRes> {
+	const { data } = await get(key);
+	const user = data as User;
+	if (password === user.password) {
+		return {
+			code: 1,
+			message: "鉴权成功",
+		};
+	} else {
+		return {
+			code: 0,
+			message: "鉴权失败",
+		};
+	}
+}
+
 export async function updateCertificates(
 	key: string,
 	certificates: Certificate[]
@@ -301,7 +320,10 @@ export async function getCertificates(
 		return {
 			code,
 			message: "证据查询成功",
-			data: [columnEncryption, ...data.certificates],
+			data: {
+				columnEncryption,
+				certificates: data.certificates,
+			},
 		};
 	}
 	return {

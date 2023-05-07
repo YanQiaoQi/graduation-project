@@ -1,7 +1,7 @@
-import { useState, useCallback, FC } from 'react';
-import { Space, Form, Button, Popconfirm, Table, Tooltip, Modal } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
-import { downloadFileByBlob, formatByte, showMessage } from '@/common/utils';
+import { useState, useCallback, FC, useMemo } from 'react';
+import { Space, Form, Button, Table, Tooltip } from 'antd';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { downloadFileByBlob, formatByte } from '@/common/utils';
 import {
     CERTIFICATE,
     URL,
@@ -10,9 +10,10 @@ import {
 } from '@/common/constant';
 import request from '@/common/request';
 import dayjs from 'dayjs';
-import { DataType, Encryption } from '.';
+import { DataType } from '.';
 import FormItem from '@/components/FormItem';
 import Container from '@/components/Container';
+import AuthModal from '../components/AuthModal';
 
 const valueToLabel: Record<string, string> = {
     clear: '明文',
@@ -80,8 +81,8 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
     const [isDecrypted, setIsDecrypted] = useState(false);
 
     const mergedOnClick = useCallback(() => {
-        setIsDecrypted(true);
         onClick().then(({ data }) => {
+            setIsDecrypted(true);
             setContent(format(dataIndex)(data));
             setTimeout(() => {
                 setIsDecrypted(false);
@@ -91,14 +92,30 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
     }, [onClick]);
 
     return (
-        <Container>
-            <Tooltip title={content}>{content}</Tooltip>
+        <Container align="space-between">
+            <Tooltip title={isDecrypted ? content : children}>
+                {content}
+            </Tooltip>
             <Button
+                size="small"
                 type="link"
-                icon={<EyeOutlined />}
+                icon={isDecrypted ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                 disabled={isDecrypted}
                 onClick={mergedOnClick}
             />
+            {/* {isDecrypted ? (
+                <EyeOutlined
+                    color="grey"
+                    disabled={isDecrypted}
+                    onClick={mergedOnClick}
+                />
+            ) : (
+                <EyeInvisibleOutlined
+                    color="grey"
+                    disabled={isDecrypted}
+                    onClick={mergedOnClick}
+                />
+            )} */}
         </Container>
     );
 };
@@ -122,65 +139,83 @@ function format(type: keyof DataType) {
 }
 
 interface CertificateTableProps {
+    columnEncryption: any;
+    setColumnEncryption: any;
     data: DataType[];
     getData: Function;
-    onChange: Function;
+    setData: Function;
 }
 
-function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
+function CertificateTable({
+    columnEncryption,
+    setColumnEncryption,
+    data,
+    getData,
+    setData,
+}: CertificateTableProps) {
     const [editingKey, setEditingKey] = useState<string>('');
 
     const [form] = Form.useForm();
 
-    const columnEncryption = data[0];
+    const authModal = AuthModal(...Form.useForm());
 
     const deleteCertificate = useCallback(
         (index) => () => {
-            request
-                .delete(`${URL.CERTIFICATE}/${index}`)
-                .then(showMessage)
-                .then(({ code }) => {
-                    if (code === 1) {
-                        getData();
-                    }
-                });
+            authModal((res) =>
+                request
+                    .delete(`${URL.CERTIFICATE}/${index}`, {
+                        data: res,
+                    })
+                    .then((res) => {
+                        if (res.code === 1) {
+                            getData();
+                        }
+                        return res;
+                    }),
+            );
         },
         [],
     );
 
     const dowloadCertificate = useCallback(
-        (index: number, name: string, encryption: Encryption) => () => {
-            request
-                .get(`${URL.CERTIFICATE}/${encryption}/${index}`, {
-                    responseType: 'blob',
-                })
-                .then((res) => {
-                    downloadFileByBlob(res, name);
-                })
-                .catch((e) => {
-                    console.log(e);
-                });
+        (index: number, name: string) => () => {
+            authModal((res) =>
+                request
+                    .get(`${URL.CERTIFICATE}/${index}`, {
+                        responseType: 'blob',
+                        data: res,
+                    })
+                    .then((res) => {
+                        downloadFileByBlob(res, name);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    }),
+            );
         },
         [],
     );
 
     const onEdit = useCallback(
         (record: Partial<DataType>) => () => {
-            form.setFieldsValue(data[0]);
+            form.setFieldsValue(columnEncryption);
             setEditingKey(record.name ?? '');
         },
-        [data],
+        [columnEncryption],
     );
 
     const onEditOk = useCallback(() => {
-        request
-            .post(`${URL.CERTIFICATE}/encrypt`, {
-                data: form.getFieldsValue(),
-            })
-            .then((res) => {
-                onChange(res.data);
-                setEditingKey('');
-            });
+        authModal((res) =>
+            request
+                .post(`${URL.CERTIFICATE}/encrypt`, {
+                    data: form.getFieldsValue(),
+                })
+                .then((res) => {
+                    setData(res.data.certificates);
+                    setColumnEncryption(res.data.columnEncryption);
+                    setEditingKey('');
+                }),
+        );
     }, []);
 
     const onEditCancel = useCallback(() => {
@@ -191,9 +226,14 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
         (dataIndex: keyof DataType, value: string) => () => {
             const encryption = columnEncryption[dataIndex];
             const cipher = encodeURIComponent(value);
-            return request.get(
-                `${URL.CERTIFICATE}/decrypt/${encryption}/${cipher}`,
-            );
+            return authModal((res) => {
+                return request.post(
+                    `${URL.CERTIFICATE}/decrypt/${encryption}/${cipher}`,
+                    {
+                        data: res,
+                    },
+                );
+            });
         },
         [columnEncryption],
     );
@@ -212,6 +252,7 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
             if (isEncrypted) {
                 return (
                     <EncryptedCell
+                        timeout={5000}
                         dataIndex={dataIndex}
                         onClick={onDecrypt(dataIndex, value)}
                     >
@@ -225,59 +266,55 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
             }
         };
 
+    const pageSize = useMemo(() => 10, []);
+
     const columns = [
         {
             title: '证据名称',
             dataIndex: 'name',
             key: 'name',
-            ellipsis: true,
             editable: true,
         },
         {
             title: '证据类型',
             dataIndex: 'type',
             key: 'type',
-            ellipsis: true,
             editable: true,
         },
         {
             title: '加密类型',
             dataIndex: 'encryption',
             key: 'encryption',
-            ellipsis: true,
             editable: true,
         },
         {
             title: '证据格式',
             dataIndex: 'extension',
             key: 'extension',
-            ellipsis: true,
             editable: true,
         },
         {
             title: '存储空间',
             dataIndex: 'size',
             key: 'size',
-            ellipsis: true,
             editable: true,
         },
         {
             title: '创建时间',
             dataIndex: 'created',
             key: 'created',
-            // ellipsis: true,
             editable: true,
         },
         {
             title: '备注',
             dataIndex: 'description',
             key: 'description',
-            // ellipsis: true,
             editable: true,
         },
         {
             title: '操作',
             key: 'action',
+            width: 150,
             render: (value: any, record: DataType, index: number) => {
                 // 加密选择行
                 if (index === 0) {
@@ -285,15 +322,9 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
                     if (record.name === editingKey) {
                         return (
                             <Space size="middle">
-                                <Popconfirm
-                                    title="确认"
-                                    description={`确认保存 ?`}
-                                    onConfirm={onEditOk}
-                                    okText="是"
-                                    cancelText="否"
-                                >
-                                    <Button size="small">确认</Button>
-                                </Popconfirm>
+                                <Button size="small" onClick={onEditOk}>
+                                    确认
+                                </Button>
                                 <Button size="small" onClick={onEditCancel}>
                                     取消
                                 </Button>
@@ -319,22 +350,17 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
                             onClick={dowloadCertificate(
                                 index - 1,
                                 originalName,
-                                encryption,
                             )}
                         >
                             下载
                         </Button>
-                        <Popconfirm
-                            title="删除"
-                            description={`确认删除证据 ${name} ?`}
-                            onConfirm={deleteCertificate(index - 1)}
-                            okText="是"
-                            cancelText="否"
+                        <Button
+                            size="small"
+                            danger
+                            onClick={deleteCertificate(index - 1)}
                         >
-                            <Button size="small" danger>
-                                删除
-                            </Button>
-                        </Popconfirm>
+                            删除
+                        </Button>
                     </Space>
                 );
             },
@@ -357,16 +383,29 @@ function CertificateTable({ data, getData, onChange }: CertificateTableProps) {
         };
     });
 
+    const mergedData = useMemo(() => {
+        const res: DataType[] = [columnEncryption];
+        data.forEach((item) => {
+            res.push(item);
+            if (res.length % pageSize === 0) {
+                res.push(columnEncryption);
+            }
+        });
+        return res;
+    }, [data, columnEncryption]);
+
     return (
         <Form form={form}>
             <Table
+                loading={data.length === 0}
                 columns={mergedColumns}
-                dataSource={data}
+                dataSource={mergedData}
                 components={{
                     body: {
                         cell: EditableCell,
                     },
                 }}
+                pagination={{ pageSize }}
             />
         </Form>
     );

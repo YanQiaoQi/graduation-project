@@ -20,13 +20,23 @@ export interface DataType {
 
 const CertificatesListPage: React.FC = () => {
     const [tableData, setTableData] = useState<DataType[]>([]);
+    const [columnEncryption, setColumnEncryption] = useState({
+        name: 'clear',
+        type: 'clear',
+        encryption: 'clear',
+        created: 'clear',
+        size: 'clear',
+        description: 'clear',
+        extension: 'clear',
+    });
 
     const allTableData = useRef<DataType[]>([]);
 
     const getData = useCallback(() => {
         request.get(URL.CERTIFICATE).then((res) => {
-            allTableData.current = res.data;
-            setTableData(res.data);
+            allTableData.current = res.data.certificates;
+            setTableData(res.data.certificates);
+            setColumnEncryption(res.data.columnEncryption);
         });
     }, []);
 
@@ -41,8 +51,14 @@ const CertificatesListPage: React.FC = () => {
                 <Button href="/dashboard/certificates/new">+ 新建证据</Button>
             }
         >
-            <TableFilter data={allTableData.current} onChange={setTableData} />
-            <Table data={tableData} getData={getData} onChange={setTableData} />
+            <TableFilter data={allTableData.current} setData={setTableData} />
+            <Table
+                columnEncryption={columnEncryption}
+                setColumnEncryption={setColumnEncryption}
+                data={tableData}
+                setData={setTableData}
+                getData={getData}
+            />
         </Card>
     );
 };
