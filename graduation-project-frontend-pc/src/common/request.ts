@@ -9,12 +9,10 @@ request.interceptors.request.use((url, options) => {
             options,
         };
     }
-    console.log(/^.*\/v1\/auth\/.*/.test(url));
-    
+
     // 非 auth 不传 token
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(`token`);
     if (!token) {
-        console.log('request');
         navigateTo('/auth/login');
         return {
             url,

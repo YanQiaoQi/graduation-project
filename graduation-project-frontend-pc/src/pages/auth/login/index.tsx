@@ -1,20 +1,23 @@
 import { useCallback } from 'react';
-import { Form, Tabs } from 'antd';
+import { Form, message, Tabs } from 'antd';
 import AuthLayout from '../components/authLayout';
 import FormItem from '../../../components/FormItem';
 import { URL } from '@/common/constant';
-import { onAuthFormFinish } from '@/common/utils';
+import { MessageWrapper, navigateTo, showMessage } from '@/common/utils';
+import request from '@/common/request';
 
 function LoginPage() {
     const onSignup = useCallback(
-        (url: string) =>
-            onAuthFormFinish(
-                url,
-                '/dashboard/personal/console',
-                ({ token }) => {
-                    localStorage.setItem('token', token!);
-                },
-            ),
+        (url: string) => (values: any) => {
+            MessageWrapper(request.post(url, { data: values }))
+                .then(({ token }) => {
+                    localStorage.setItem(`token`, token!);
+                    navigateTo('/dashboard/personal/console');
+                })
+                .catch((e) => {
+                    console.log(`${e.message}`);
+                });
+        },
         [],
     );
 

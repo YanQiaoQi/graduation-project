@@ -53,8 +53,20 @@ export default defineConfig({
                     component: '@/pages/dashboard/certificates/list',
                 },
                 {
+                    path: '/dashboard/certificates/all',
+                    component: '@/pages/dashboard/certificates/all',
+                },
+                {
                     path: '/dashboard/certificates/new',
                     component: '@/pages/dashboard/certificates/new',
+                },
+                {
+                    path: '/dashboard/applications/my',
+                    component: '@/pages/dashboard/applications/my',
+                },
+                {
+                    path: '/dashboard/applications/others',
+                    component: '@/pages/dashboard/applications/others',
                 },
             ],
         },

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-export const WSL_IP = "172.29.51.192";
+export const WSL_IP = "172.31.91.173";
 
 function getCcpAdaptedWSL(ccpPath: string, ip = WSL_IP) {
 	const originalCcpJson = fs.readFileSync(ccpPath, "utf8");
@@ -19,7 +19,5 @@ export const ccpPath = path.resolve(
 export const walletPath = path.resolve(__dirname, "wallet");
 
 export const ccp = getCcpAdaptedWSL(ccpPath);
-
-console.log(`Wallet path: ${walletPath}`);
 
 export const CA_DOMAIN = "ca.example.com";

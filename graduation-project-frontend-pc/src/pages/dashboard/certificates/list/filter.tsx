@@ -1,11 +1,12 @@
-import {  useCallback } from 'react';
+import { useCallback } from 'react';
 import { Form, Button, DatePicker, Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { CERTIFICATE } from '@/common/constant';
 import dayjs from 'dayjs';
-import { DataType } from '.';
+import { CERTIFICATE } from '@/common/constant';
+import { Certificate } from '@/common/type';
+
 interface CertificateFilterProps {
-    data: DataType[];
+    data: Certificate[];
     setData: any;
 }
 

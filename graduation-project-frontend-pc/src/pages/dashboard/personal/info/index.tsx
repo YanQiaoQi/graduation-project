@@ -1,9 +1,10 @@
+import { useEffect, useState, useMemo, useContext } from 'react';
 import { Button, Card, Descriptions, Tag } from 'antd';
-import { useEffect, useState, useMemo } from 'react';
 import request from '@/common/request';
 import { URL } from '@/common/constant';
-import dayjs from 'dayjs';
 import { onNavigateTO } from '@/common/utils';
+import { UserContext } from '@/common/contexts';
+import dayjs from 'dayjs';
 
 interface PersonalInfoPageProps {}
 
@@ -14,21 +15,21 @@ function PersonalInfoPage({}: PersonalInfoPageProps) {
 
     const hasKYCText = useMemo(() => (hasKYC ? '已实名' : '未实名'), [hasKYC]);
 
-    useEffect(() => {
-        request.get(URL.USER).then(({ data }) => {
-            setuserInfo(data.info);
-        });
-    }, []);
+    const user = useContext(UserContext);
+
+    // useEffect(() => {
+        // request.get(URL.USER).then(({ data }) => {
+            // setuserInfo(data.info);
+        // });
+    // }, []);
 
     return (
         <Card title="基本信息">
             <Descriptions column={2}>
                 <Descriptions.Item label="用户名">
-                    {userInfo['email']}
+                    {user.email}
                 </Descriptions.Item>
-                <Descriptions.Item label="邮箱">
-                    {userInfo['email']}
-                </Descriptions.Item>
+                <Descriptions.Item label="邮箱">{user.email}</Descriptions.Item>
                 <Descriptions.Item label="注册时间">
                     {dayjs(userInfo['created']).format('YYYY-MM-DD HH:mm:ss')}
                 </Descriptions.Item>

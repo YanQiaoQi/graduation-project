@@ -6,11 +6,17 @@ import {
 import FabricCAServices from "fabric-ca-client";
 import { ccp, walletPath, CA_DOMAIN } from "./common";
 import {
+	ApplyItem,
 	Certificate,
 	ColumnEncryption,
 	FabricRes,
 	User,
-} from "./interface";
+	FabricResWithData,
+	ArrayPropOfUser,
+	ItemType,
+	Email,
+	Ledger,
+} from "../../common/type";
 
 const userId = "appUser";
 
@@ -185,244 +191,261 @@ export async function set(
 	return invoke({
 		func: "storeDataHash",
 		argus: [key, JSON.stringify(value)],
-	})
-		.then(() => {
-			return {
-				code: 1,
-				message: "设置成功",
-			};
-		})
-		.catch((e) => {
-			return {
-				code: 0,
-				message: "设置失败",
-			};
-		});
+	}).then(() => {
+		return {
+			code: 1,
+			message: "设置成功",
+		};
+	});
 }
 
-export async function get(key: string): Promise<any> {
+export async function get(
+	key: string
+): Promise<FabricResWithData<User>> {
 	return invoke({
 		func: "queryDataHash",
 		argus: [key],
-	})
-		.then((FabricRes) => {
-			if (FabricRes) {
-				const { DataHash } = JSON.parse(
-					FabricRes.toString("utf-8")
-				);
-				return {
-					code: 1,
-					data: JSON.parse(DataHash),
-				};
-			}
+	}).then((FabricRes) => {
+		if (FabricRes?.toString("utf-8")) {
+			const data = JSON.parse(
+				JSON.parse(FabricRes.toString("utf-8"))
+			);
 			return {
-				code: 0,
-				message: "未有该key的数据",
-				data: null,
+				code: 1,
+				message: "获取成功",
+				data,
 			};
-		})
-		.catch((e) => {
-			return {
-				code: 0,
-				message: e,
-				data: null,
-			};
-		});
+		}
+		return {
+			code: 0,
+			message: "没有",
+			data: {
+				password: "",
+				info: {
+					created: Date.now(),
+				},
+				columnEncryption: {
+					name: "clear",
+					type: "clear",
+					encryption: "clear",
+					created: "clear",
+					size: "clear",
+					description: "clear",
+					extension: "clear",
+					last_updated: "clear",
+				},
+				certificates: [],
+				othersApplications: [],
+				myApplications: [],
+			},
+		};
+	});
 }
+
+export function addItems(prop: ArrayPropOfUser) {
+	return async (
+		key: string,
+		items: ItemType[]
+	): Promise<FabricRes> => {
+		const { data: user } = await get(key);
+		//@ts-ignore
+		user[prop].push(...items);
+		await set(key, user);
+		return {
+			code: 1,
+			message: "证据更新成功",
+		};
+	};
+}
+
+export function deleteItem(prop: ArrayPropOfUser) {
+	return async (
+		key: Email,
+		index: number
+	): Promise<FabricRes> => {
+		const { data: user } = await get(key);
+		//@ts-ignore
+		user[prop].splice(index, 1);
+		await set(key, user);
+		return {
+			code: 1,
+			message: "证据删除成功",
+		};
+	};
+}
+
+export function getItem<T = any>(prop: ArrayPropOfUser) {
+	return async (
+		key: Email,
+		index: number
+	): Promise<FabricResWithData<T>> => {
+		const { data: user } = await get(key);
+		return {
+			code: 1,
+			data: user[prop][index] as T,
+			message: "证据删除成功",
+		};
+	};
+}
+
+export function getItemByCreated<T extends ItemType>(
+	prop: ArrayPropOfUser
+) {
+	return async (
+		key: Email,
+		created: number
+	): Promise<FabricResWithData<T>> => {
+		const { data: user } = await get(key);
+		//@ts-ignore
+		const item = user[prop].find(
+			//@ts-ignore
+			(item) => item.created === created
+		);
+		return {
+			code: 1,
+			data: item as T,
+			message: "证据删除成功",
+		};
+	};
+}
+
+export const addOthersApply = addItems(
+	"othersApplications"
+);
+
+export const addMyApplication = addItems("myApplications");
+
+export const addCertificates = addItems("certificates");
+
+export const deleteCertificate = deleteItem("certificates");
+
+export const deleteMyApplication = deleteItem(
+	"myApplications"
+);
+
+export const deleteOthersApplication = deleteItem(
+	"othersApplications"
+);
+
+export const getCertificate = getItem("certificates");
+
+export const getMyApplication = getItem<ApplyItem>(
+	"myApplications"
+);
+
+export const getOthersApplication = getItem<ApplyItem>(
+	"othersApplications"
+);
 
 export async function isAuthorized(
 	key: string,
 	password: string
 ): Promise<FabricRes> {
-	const { data } = await get(key);
-	const user = data as User;
+	const { data: user } = await get(key);
 	if (password === user.password) {
 		return {
 			code: 1,
 			message: "鉴权成功",
 		};
-	} else {
-		return {
-			code: 0,
-			message: "鉴权失败",
-		};
 	}
+	throw Error("鉴权失败");
 }
 
-export async function updateCertificates(
-	key: string,
-	certificates: Certificate[]
-): Promise<FabricRes> {
-	const { code, data } = await get(key);
-	if (code === 1) {
-		const user = data as User;
-		user.certificates.push(...certificates);
-		const { code } = await set(key, user);
-		if (code === 1) {
-			return {
-				code,
-				message: "证据更新成功",
-			};
-		} else {
-			return {
-				code,
-				message: "证据更新失败",
-			};
-		}
-	}
-	return {
-		code,
-		message: "该key不存在数据",
-	};
-}
-
-export async function deleteCertificates(
-	key: string,
-	index: number
-): Promise<FabricRes> {
-	const { code, data } = await get(key);
-	if (code === 1) {
-		const user = data as User;
-		user.certificates.splice(index, 1);
-		const { code } = await set(key, user);
-		if (code === 1) {
-			return {
-				code,
-				message: "证据删除成功",
-			};
-		} else {
-			return {
-				code,
-				message: "证据删除失败",
-			};
-		}
-	}
-	return {
-		code,
-		message: "该key不存在数据",
-	};
-}
-
+/**
+ * 查
+ * 获取 user.certificates
+ *
+ * @param key
+ * @returns
+ */
 export async function getCertificates(
 	key: string
 ): Promise<FabricRes> {
-	const { code, data } = await get(key);
-	if (code === 1) {
-		const columnEncryption = data?.columnEncryption ?? {
-			name: "clear",
-			type: "clear",
-			encryption: "clear",
-			created: "clear",
-			size: "clear",
-			description: "clear",
-			extension: "clear",
-		};
-		return {
-			code,
-			message: "证据查询成功",
-			data: {
-				columnEncryption,
-				certificates: data.certificates,
-			},
-		};
-	}
+	const { data: user } = await get(key);
 	return {
-		code,
-		message: "该key不存在数据",
-		data: null,
+		code: 1,
+		message: "证据查询成功",
+		data: {
+			columnEncryption: user?.columnEncryption,
+			certificates: user.certificates,
+		},
 	};
 }
 
-export async function getCertificate(
-	key: string,
-	index: number
-): Promise<FabricRes> {
-	const { code, data } = await get(key);
-	if (code === 1) {
+export async function getLedger(): Promise<Ledger> {
+	const data = await invoke({
+		func: "queryAllDataHash",
+		argus: [],
+	});
+	const ledger = JSON.parse(
+		data?.toString("utf-8") ?? "{}"
+	);
+	for (let key in ledger) {
+		const user = JSON.parse(
+			JSON.parse(ledger[key])
+		) as User;
+		ledger[key] = user;
+	}
+	return ledger;
+}
+
+/**
+ * 查
+ * 获取所有用户的 certificates
+ *
+ * @returns
+ */
+export async function getAllCertificates(): Promise<FabricRes> {
+	const data = await invoke({
+		func: "queryAllDataHash",
+		argus: [],
+	});
+
+	if (data) {
+		const ledger = JSON.parse(data.toString("utf-8"));
+		const allCertificates = [];
+		for (let key in ledger) {
+			const user = JSON.parse(
+				JSON.parse(ledger[key])
+			) as User;
+			allCertificates.push({
+				columnEncryption: user.columnEncryption,
+				certificates: user.certificates,
+				user: key,
+			});
+		}
 		return {
-			code,
-			message: "证据查询成功",
-			data: data.certificates[index],
+			code: 1,
+			data: allCertificates,
+			message: "查询成功",
 		};
 	}
 	return {
-		code,
-		message: "该key不存在数据",
-		data: null,
+		code: 0,
+		message: "查询失败",
 	};
 }
 
+/**
+ * 改
+ * 更新 user.columnEncryption
+ *
+ * @param key
+ * @param columnEncryption
+ * @returns
+ */
 export async function updateColumnEncryption(
 	key: string,
 	columnEncryption: ColumnEncryption
 ): Promise<FabricRes> {
-	const { code, data } = await get(key);
-	if (code === 1) {
-		const user = data as User;
-		user.columnEncryption = columnEncryption;
-		const { code } = await set(key, user);
-		if (code === 1) {
-			return {
-				code,
-				message: "更新成功",
-			};
-		}
-	}
+	const { data: user } = await get(key);
+	user.columnEncryption = columnEncryption;
+	await set(key, user);
 	return {
-		code,
-		message: "更新失败",
+		code: 1,
+		message: "更新成功",
 	};
 }
-
-// async function query() {
-// 	try {
-// 		// Create a new file system based wallet for managing identities.
-// 		const walletPath = path.join(process.cwd(), "wallet");
-// 		const wallet = new FileSystemWallet(walletPath);
-// 		console.log(`Wallet path: ${walletPath}`);
-
-// 		// Check to see if we've already enrolled the user.
-// 		const userExists = await wallet.exists("user1");
-// 		if (!userExists) {
-// 			console.log(
-// 				'An identity for the user "user1" does not exist in the wallet'
-// 			);
-// 			console.log(
-// 				"Run the registerUser.ts application before retrying"
-// 			);
-// 			return;
-// 		}
-
-// 		// Create a new gateway for connecting to our peer node.
-// 		const gateway = new Gateway();
-// 		await gateway.connect(ccpPath, {
-// 			wallet,
-// 			identity: "user1",
-// 			discovery: { enabled: true, asLocalhost: true },
-// 		});
-
-// 		// Get the network (channel) our contract is deployed to.
-// 		const network = await gateway.getNetwork("mychannel");
-
-// 		// Get the contract from the network.
-// 		const contract = network.getContract("fabcar");
-
-// 		// Evaluate the specified transaction.
-// 		// queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
-// 		// queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
-// 		const result = await contract.evaluateTransaction(
-// 			"queryAllCars"
-// 		);
-// 		console.log(
-// 			`Transaction has been evaluated, result is: ${result.toString()}`
-// 		);
-// 	} catch (error) {
-// 		console.error(
-// 			`Failed to evaluate transaction: ${error}`
-// 		);
-// 		process.exit(1);
-// 	}
-// }
 
 export async function init() {
 	const channel = "mychannel";

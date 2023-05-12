@@ -1,27 +1,34 @@
-import { RequestHandler } from "../../../common/type";
+import { Router } from "express";
+import { Request } from "express-jwt";
 import { Res } from "../../../common/res";
 import * as FabricSDK from "../../../services/fabric-sdk";
-// 增
-export const getUserInfo: RequestHandler = async (
-	req,
-	response
-) => {
-	// @ts-ignore
-	const email = req.auth.email;
-	const res = await FabricSDK.get(email);
-	res.data.info.email = email;
-	response.send(Res.create(res));
-};
 
-// 鉴权
-export const isAuthorized: RequestHandler = async (
-	req,
-	res
-) => {
-	// @ts-ignore
-	const email = req.auth.email;
-	email
-		? res.send(Res.success("已鉴权"))
-		: res.send(Res.fail("未鉴权"));
-	return;
-};
+const userRouter = Router();
+
+userRouter.get("/", async (req: Request, response) => {
+	const email = req.auth?.email;
+	const res = await FabricSDK.get(email);
+	response.send(Res.create(res));
+});
+
+userRouter.get(
+	"/isAuthorized",
+	async (req: Request, res) => {
+		const email = req.auth?.email;
+		email
+			? res.send({
+					status: 200,
+					code: 1,
+					message: "鉴权成功",
+					data: { email },
+			  })
+			: res.send({
+					status: 401,
+					code: 0,
+					message: "鉴权失败",
+			  });
+		return;
+	}
+);
+
+export default userRouter;

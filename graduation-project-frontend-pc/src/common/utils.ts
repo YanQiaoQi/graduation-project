@@ -1,5 +1,8 @@
 import { message as AntdMessage } from 'antd';
 import request from './request';
+import dayjs from 'dayjs';
+import { CERTIFICATE } from './constant';
+import { Certificate, CertificateType } from './type';
 
 export function navigateTo(path: string) {
     location.pathname = path;
@@ -87,11 +90,47 @@ function pow1024(num: number) {
     return Math.pow(1024, num);
 }
 
-export const formatByte = (size: number) => {
+const formatByte = (size: number) => {
     if (!size) return '';
     if (size < pow1024(1)) return size + ' B';
     if (size < pow1024(2)) return (size / pow1024(1)).toFixed(2) + ' KB';
     if (size < pow1024(3)) return (size / pow1024(2)).toFixed(2) + ' MB';
     if (size < pow1024(4)) return (size / pow1024(3)).toFixed(2) + ' GB';
     return (size / pow1024(4)).toFixed(2) + ' TB';
+};
+
+export function format(type: keyof Certificate) {
+    switch (type) {
+        case 'created': {
+            return (value: string) =>
+                dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
+        }
+        case 'type': {
+            return (value: CertificateType) => CERTIFICATE.TYPE_TO_TEXT[value];
+        }
+        case 'size': {
+            return (value: string) => formatByte(parseInt(value));
+        }
+        default: {
+            return (value: any) => value;
+        }
+    }
+}
+
+// export const MessageWrapper =
+//     <Func extends (...args: Parameters<Func>) => any>(service: Func) =>
+//     (...argus: Parameters<Func>) => {
+//         AntdMessage.open({
+//             type: 'loading',
+//             content: '',
+//         });
+//         return service(...argus).then(showMessage);
+//     };
+
+export const MessageWrapper = async <T extends Result>(promise: Promise<T>) => {
+    AntdMessage.open({
+        type: 'loading',
+        content: '请稍等',
+    });
+    return promise.then(showMessage);
 };

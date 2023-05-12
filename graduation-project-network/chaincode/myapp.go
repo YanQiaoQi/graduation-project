@@ -27,6 +27,11 @@ type UpdateData struct {
 type SimpleChaincode struct {
 }
 
+type QueryResult struct {
+	email        string `json:"email"`
+	certificates string
+}
+
 // 初始化智能合约
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	return shim.Success(nil)
@@ -42,6 +47,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.queryDataHash(stub, args)
 	} else if function == "updateDataHash" {
 		return t.updateDataHash(stub, args)
+	} else if function == "queryAllDataHash" {
+		return t.queryAllDataHash(stub, args)
 	}
 	return shim.Error("Invalid function name.")
 }
@@ -62,6 +69,43 @@ func (t *SimpleChaincode) queryDataHash(stub shim.ChaincodeStubInterface, args [
 	//}
 
 	return shim.Success(dataBytes)
+}
+
+func (t *SimpleChaincode) queryAllDataHash(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. Expecting 0")
+	}
+
+	startKey := ""
+	endKey := ""
+
+	// 查询数据哈希值
+	resultsIterator, err := stub.GetStateByRange(startKey, endKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	//if dataBytes == nil {
+	//   return shim.Error("No data with key: " + args[0])
+	//}
+	defer resultsIterator.Close()
+	//定义了查询结果的切片
+	rsp := make(map[string]string)
+	//查询之后返回迭代器，GetStateByRange里的hasnext()和next()进行循环，实现功能
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		rsp[queryResponse.Key] = string(queryResponse.Value)
+	}
+	jsonRsp, err := json.Marshal(rsp)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	return shim.Success(jsonRsp)
 }
 
 func (t *SimpleChaincode) updateDataHash(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -112,8 +156,7 @@ func (t *SimpleChaincode) storeDataHash(stub shim.ChaincodeStubInterface, args [
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 	id := args[0]
-	dataHash := args[1]
-	data := Data{DataHash: dataHash}
+	data := args[1]
 
 	dataBytes, err := json.Marshal(data)
 	if err != nil {

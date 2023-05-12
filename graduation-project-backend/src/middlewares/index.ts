@@ -2,6 +2,7 @@ import { Express } from "express";
 import bodyParser from "body-parser";
 import { CORS } from "./cors";
 import { errorToken, JWT } from "./jwt";
+import { error } from "./error";
 
 export const initMiddlewares = (app: Express) => {
 	app.use(bodyParser.json());

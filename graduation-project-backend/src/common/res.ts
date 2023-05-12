@@ -1,4 +1,4 @@
-import { FabricRes } from "../services/fabric-sdk/interface";
+import { FabricRes } from "./type";
 
 export type Result<T = any> = {
 	status: number;

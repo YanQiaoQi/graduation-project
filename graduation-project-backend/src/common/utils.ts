@@ -1,11 +1,15 @@
 import { readFile, writeFile } from "fs/promises";
 import Path from "path";
 import CryptoJS from "crypto-js";
-import { Encryption } from "../controllers/v1/certificate/interface";
 import {
 	Certificate,
 	ColumnEncryption,
-} from "../services/fabric-sdk/interface";
+	Encryption,
+} from "./type";
+
+export function getRandom6Num() {
+	return parseInt(String(Math.random() * 1000000));
+}
 
 export function splitFileName(filename: string) {
 	const fileArr = filename.split(".");
@@ -126,8 +130,8 @@ function decryptCertificate(
 ) {
 	for (let key in columnEncryption) {
 		if (
-			columnEncryption.hasOwnProperty(key) &&
-			certificate.hasOwnProperty(key)
+			columnEncryption?.hasOwnProperty(key) &&
+			certificate?.hasOwnProperty(key)
 		) {
 			const prop = key as keyof Certificate;
 			const encryption = columnEncryption[prop];

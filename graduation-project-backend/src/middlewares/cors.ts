@@ -1,4 +1,4 @@
-import { RequestHandler } from "../common/type";
+import { RequestHandler } from "express";
 
 export function CORS(): RequestHandler {
 	return (req, res, next) => {

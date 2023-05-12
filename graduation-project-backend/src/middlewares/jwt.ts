@@ -1,7 +1,7 @@
 import {
 	RequestHandler,
 	ErrorRequestHandler,
-} from "../common/type";
+} from "express";
 import { expressjwt } from "express-jwt";
 import { jwtSecretKey } from "../services/redis/common";
 import Res from "../common/res";

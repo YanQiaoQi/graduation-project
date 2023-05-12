@@ -1,6 +1,7 @@
 import React from 'react';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
 import { LaptopOutlined, UserOutlined } from '@ant-design/icons';
+import { ColumnEncryption } from './type';
 
 const BASIC_URL = 'http://localhost:3000/v1';
 
@@ -17,15 +18,6 @@ export const URL = {
     CERTIFICATE: `${BASIC_URL}/certificate`,
     USER: `${BASIC_URL}/user`,
 };
-
-// Certificate
-
-export type CertificateType =
-    | 'video'
-    | 'audio'
-    | 'document'
-    | 'image'
-    | 'webpage';
 
 export const CERTIFICATE = {
     TYPE: {
@@ -102,6 +94,31 @@ export const ENCRYPTION_ITEMS_MAP = {
     ],
 };
 
+type Map<T = string> = Record<string, T>;
+
+type a = {
+    VALUE_TO_LABEL: Map;
+    ITEMS_MAP: Map<any>;
+};
+
+export const ENCRYPTION: a = {
+    VALUE_TO_LABEL: {
+        clear: '明文',
+        AES: 'AES',
+    },
+    ITEMS_MAP: ENCRYPTION_ITEMS_MAP,
+};
+
+export const defaultColumnEncryption: ColumnEncryption = {
+    name: 'clear',
+    type: 'clear',
+    encryption: 'clear',
+    created: 'clear',
+    size: 'clear',
+    description: 'clear',
+    extension: 'clear',
+};
+
 type Page = 'NAV' | 'SIDER';
 
 export const PAGE_ITEMS: Record<Page, ItemType[]> = {
@@ -145,6 +162,25 @@ export const PAGE_ITEMS: Record<Page, ItemType[]> = {
                 {
                     key: `list`,
                     label: `证据列表`,
+                },
+                {
+                    key: `all`,
+                    label: `证据库`,
+                },
+            ],
+        },
+        {
+            key: `applications`,
+            label: `申请中心`,
+            icon: React.createElement(LaptopOutlined),
+            children: [
+                {
+                    key: `my`,
+                    label: `我的申请`,
+                },
+                {
+                    key: `others`,
+                    label: `他人申请`,
                 },
             ],
         },
