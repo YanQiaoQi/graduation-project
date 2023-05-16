@@ -102,8 +102,10 @@ const formatByte = (size: number) => {
 export function format(type: keyof Certificate) {
     switch (type) {
         case 'created': {
-            return (value: string) =>
-                dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
+            return (value: string) => {
+                const res = dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
+                return res === 'Invalid Date' ? value : res;
+            };
         }
         case 'type': {
             return (value: CertificateType) => CERTIFICATE.TYPE_TO_TEXT[value];

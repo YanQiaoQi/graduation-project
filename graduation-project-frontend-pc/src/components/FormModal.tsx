@@ -2,16 +2,27 @@ import { Modal as AntdModal, Form, message } from 'antd';
 import FormItem from '@/components/FormItem';
 import { FormInstance } from 'antd/es/form/Form';
 import { showMessage } from '@/common/utils';
+import { ReactNode } from 'react';
 
-function AuthModal(form: FormInstance) {
-    return (onfulfilled: (value: unknown) => any) =>
+interface FormModalPrps {
+    form: FormInstance;
+    formChildren?: ReactNode;
+    title?: string;
+}
+
+function FormModal<T>({
+    form,
+    formChildren,
+    title = '请输入密码',
+}: FormModalPrps) {
+    return (onfulfilled: (value: T) => any) =>
         new Promise((resolve, reject) => {
             AntdModal.confirm({
-                title: '请输入密码',
+                title,
                 centered: true,
                 content: (
                     <Form
-                        layout="vertical"
+                        layout="horizontal"
                         form={form}
                         onFinish={(value) => {
                             resolve(value);
@@ -23,7 +34,7 @@ function AuthModal(form: FormInstance) {
                         }}
                         style={{ marginTop: 12, marginBottom: -16 }}
                     >
-                        <FormItem.Input.Password />
+                        {formChildren ?? <FormItem.Input.Password />}
                     </Form>
                 ),
                 onOk: async () => {
@@ -33,8 +44,9 @@ function AuthModal(form: FormInstance) {
                 },
             });
         })
+            // @ts-ignore
             .then(onfulfilled)
             .then(showMessage);
 }
 
-export default AuthModal;
+export default FormModal;

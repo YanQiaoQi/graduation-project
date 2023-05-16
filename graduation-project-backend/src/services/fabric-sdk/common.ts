@@ -13,7 +13,7 @@ function getCcpAdaptedWSL(ccpPath: string, ip = WSL_IP) {
 
 export const ccpPath = path.resolve(
 	__dirname,
-	"connection-org1.json"
+	"connection.json"
 );
 
 export const walletPath = path.resolve(__dirname, "wallet");

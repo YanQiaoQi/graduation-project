@@ -1,11 +1,4 @@
-import { FabricRes } from "./type";
-
-export type Result<T = any> = {
-	status: number;
-	message?: string;
-	code: 0 | 1;
-	data?: T;
-};
+import { FabricRes, Result } from "./type";
 
 export const Res = {
 	create: (fabricRes: FabricRes, status = 200): Result => {

@@ -2,13 +2,16 @@ import { Router } from "express";
 import { Request } from "express-jwt";
 import path from "path";
 import { DeleteCertificate, NewCertificate } from "./type";
-import { Result, Res } from "../../../../common/res";
+import { Res } from "../../../../common/res";
 import {
 	writeEncryptedFile,
 	splitFileName,
 	cryptography,
 } from "../../../../common/utils";
-import { Certificate } from "../../../../common/type";
+import {
+	Certificate,
+	Result,
+} from "../../../../common/type";
 import * as FabricSDK from "../../../../services/fabric-sdk";
 import upload from "../../../../middlewares/multer";
 
@@ -28,11 +31,16 @@ certificateCrudRouter.post<
 	const { data: user } = await FabricSDK.get(email);
 	const columnEncryption = user.columnEncryption;
 	// 信息存入
+	let prevCreated: number;
 	const certificates: Certificate[] = files?.map(
 		({ buffer, originalname, size }) => {
-			const [name, extension] = splitFileName(originalname);
-			const created = Date.now();
+			let created = Date.now();
+			if (prevCreated === created) {
+				created++;
+			}
+			prevCreated = created;
 			const last_updated = created;
+			const [name, extension] = splitFileName(originalname);
 			writeEncryptedFile(
 				path.resolve(
 					`upload/${email}-${created}-${originalname}`
@@ -104,22 +112,43 @@ certificateCrudRouter.get(
 	}
 );
 
-certificateCrudRouter.get(
-	"/download/:index",
+certificateCrudRouter.post(
+	"/download/:email/:created",
 	async function downloadCertificate(req, res) {
 		// @ts-ignore
 		const email = req.auth?.email;
-		const { index } = req.params;
-		const { data: user } = await FabricSDK.get(email);
-		const certificate = user.certificates[parseInt(index)];
+		const { email: targetEmail } = req.params;
+		let created: string | number = parseInt(
+			req.params.created
+		);
+		if (isNaN(created)) {
+			created = req.params.created;
+		}
+		const ledger = await FabricSDK.getLedger();
+		const targetUser = ledger[targetEmail];
+		const originUser = ledger[email];
+		const isAuthed = originUser.authorizedCertificates[
+			targetEmail
+		]?.find(
+			(certificate) => certificate.created === created
+		);
+		if (email !== targetEmail && !isAuthed) {
+			throw new Error("不具有权限");
+		}
+		const certificate: Certificate =
+			targetUser.certificates.find(
+				(certificate) => certificate.created === created
+			)!;
+		if (!certificate) {
+			throw new Error("未找到证据");
+		}
 		cryptography.decrypt.certificate(
 			certificate,
-			user.columnEncryption
+			targetUser.columnEncryption
 		);
-		const { created, name, extension, encryption } =
-			certificate;
+		const { name, extension, encryption } = certificate;
 		const absolutePath = path.resolve(
-			`upload/${email}-${created}-${name}.${extension}`
+			`upload/${targetEmail}-${certificate.created}-${name}.${extension}`
 		);
 		const data = await cryptography.decrypt.file(
 			encryption,

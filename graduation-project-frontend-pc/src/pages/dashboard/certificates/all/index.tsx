@@ -1,28 +1,49 @@
-import { useContext } from 'react';
-import { Card } from 'antd';
-import request from '@/common/request';
-import { URL } from '@/common/constant';
-import { UserContext } from '@/common/contexts';
-import Table from './Table';
+import { useContext, useMemo } from 'react';
+import { Card, Space } from 'antd';
 import useRequest from '@ahooksjs/use-request';
+import { UserContext } from '@/common/contexts';
+import {
+    getAllCertificates,
+    getAuthorizedApplication,
+} from '@/service/certificate';
+import Table from './allUsersTable';
+import AuthedTable from './authTable';
 
-interface AllPageProps {}
-
-function AllPage({}: AllPageProps) {
+function AllPage() {
     const { email } = useContext(UserContext);
 
-    const { data, loading, error } = useRequest<any>(async () => {
-        return request.get(`${URL.CERTIFICATE}/all`);
-    });
+    const { data: allUsersCertificates, loading: loading0 } =
+        useRequest(getAllCertificates);
+
+    const { data: authorizedCertificates, loading: loading1 } = useRequest(
+        getAuthorizedApplication,
+    );
+
+    const isShow = useMemo(
+        () =>
+            authorizedCertificates?.data &&
+            authorizedCertificates?.data?.length !== 0,
+        [authorizedCertificates],
+    );
 
     return (
-        <Card title="证据库">
-            <Table
-                user={email ?? ''}
-                loading={loading}
-                data={data?.data ?? []}
-            />
-        </Card>
+        <Space size={16} direction="vertical" style={{ width: '100%' }}>
+            {isShow && (
+                <Card title="授权证据">
+                    <AuthedTable
+                        loading={loading1}
+                        data={authorizedCertificates?.data}
+                    />
+                </Card>
+            )}
+            <Card title="证据库">
+                <Table
+                    user={email ?? ''}
+                    loading={loading0}
+                    data={allUsersCertificates?.data}
+                />
+            </Card>
+        </Space>
     );
 }
 

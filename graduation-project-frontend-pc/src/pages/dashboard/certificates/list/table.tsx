@@ -4,7 +4,7 @@ import { downloadFileByBlob } from '@/common/utils';
 import { URL } from '@/common/constant';
 import request from '@/common/request';
 import { Certificate, ColumnEncryption, Encryption } from '@/common/type';
-import AuthModal from '../../components/AuthModal';
+import FormModal from '../../../../components/FormModal';
 import Table from '../../components/CertificateTable/index';
 
 interface CertificateTableProps {
@@ -28,7 +28,9 @@ function CertificateTable({
 
     const [form] = Form.useForm();
 
-    const authModal = AuthModal(...Form.useForm());
+    const [modalForm] = Form.useForm();
+
+    const authModal = FormModal({ form: modalForm });
 
     const deleteCertificate = useCallback(
         (index) => () => {

@@ -49,6 +49,7 @@ authRouter.post("/signup", async (req, res) => {
 		certificates: [],
 		othersApplications: [],
 		myApplications: [],
+		authorizedCertificates: {},
 	};
 	await FabricSDK.set(email, user);
 	res.send(Res.success("注册成功"));

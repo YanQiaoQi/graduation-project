@@ -44,9 +44,6 @@ const ConsolePage: FC = ({ children }) => {
         request.get(`${URL.USER}/isAuthorized`).then(({ data }) => {
             setUser(data);
         });
-        getApplications().then(({ data }) => {
-            console.log(data);
-        });
     }, []);
 
     return (

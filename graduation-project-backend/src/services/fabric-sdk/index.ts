@@ -237,6 +237,7 @@ export async function get(
 				certificates: [],
 				othersApplications: [],
 				myApplications: [],
+				authorizedCertificates: {},
 			},
 		};
 	});
@@ -452,4 +453,8 @@ export async function init() {
 	const chaincode = "myapp";
 	await enrollAdmain();
 	await registerUser(userId);
+}
+
+class Fabric {
+	constructor() {}
 }

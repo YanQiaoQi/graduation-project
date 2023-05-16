@@ -8,6 +8,7 @@ interface ContainerProps {
     expand?: boolean;
     style?: CSSProperties;
     flex?: boolean;
+    wrap?: boolean;
     direction?: 'row' | 'column';
     align?: 'space-between' | 'start' | 'center';
 }
@@ -15,6 +16,7 @@ interface ContainerProps {
 function Container({
     expand = false,
     flex = false,
+    wrap = false,
     children,
     direction,
     align,
@@ -32,6 +34,7 @@ function Container({
     const className = classNames(customClassName, {
         'container-expand': expand,
         'container-flex': isFlex,
+        [`container-flex-wrap`]: wrap,
         [`container-flex-direction-${flexDirection}`]: isFlex,
         [`container-flex-justify-content-${justifyContent}`]: isFlex,
     });

@@ -1,6 +1,9 @@
 import {
 	ApplyType,
+	AuthCertificate,
 	Certificate,
+	ColumnEncryption,
+	Email,
 } from "../../../../common/type";
 
 export namespace Apply {
@@ -23,6 +26,8 @@ export namespace Process {
 
 	export type ReqBody = {
 		code: 0 | 1;
-		expire: number;
+		expire?: number;
 	};
 }
+
+

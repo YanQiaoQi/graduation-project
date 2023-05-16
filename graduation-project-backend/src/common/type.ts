@@ -1,3 +1,10 @@
+export type Result<T = any> = {
+	status: number;
+	message?: string;
+	code: 0 | 1;
+	data?: T;
+};
+
 export type Email = string;
 
 export type Encryption = "clear" | "AES";
@@ -5,11 +12,11 @@ export type Encryption = "clear" | "AES";
 export type Certificate = {
 	name: string;
 	type: string;
-	size: number;
+	size: number | string;
 	encryption: Encryption;
 	description: string;
 	extension: string;
-	created: number;
+	created: number | string;
 	last_updated: number;
 };
 
@@ -30,11 +37,11 @@ export type ApplyResult = {
 	// 结束时间
 	endTime: number;
 	// 当申请成功时，设置过期时间
-	expire: number;
+	expire?: number;
 	// 当申请成功时，
 	// type 为 download 时，即是下载链接
 	// type 为 decrypt 时，即是结果
-	data: string;
+	data?: string;
 };
 
 export type ApplyItem = {
@@ -56,6 +63,21 @@ export type ApplyItem = {
 	result?: ApplyResult;
 };
 
+export type AuthItem = {
+	type: ApplyType;
+	expire: number;
+	prop?: keyof Certificate;
+};
+
+export interface AuthorizedItem {
+	created: number | string;
+	auth: AuthItem;
+}
+
+export interface AuthCertificate extends Certificate {
+	auth: AuthItem;
+}
+
 export interface User {
 	info: UserInfo;
 	password: String;
@@ -65,7 +87,15 @@ export interface User {
 	othersApplications: ApplyItem[];
 	// 我发起的申请
 	myApplications: ApplyItem[];
+	// 获取权限的他人的证据
+	authorizedCertificates: Record<Email, AuthorizedItem[]>;
 }
+
+export type LedgerItem = {
+	user: Email;
+	columnEncryption: ColumnEncryption;
+	certificates: AuthCertificate[];
+};
 
 export type Ledger = Record<Email, User>;
 

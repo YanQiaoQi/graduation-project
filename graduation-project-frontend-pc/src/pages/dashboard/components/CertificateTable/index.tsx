@@ -3,18 +3,18 @@ import { Table } from 'antd';
 import { ENCRYPTION } from '@/common/constant';
 import { Certificate, Encryption } from '@/common/type';
 import { format } from '@/common/utils';
-import EditableCell from './EditableCell';
-import EncryptedCell from './EncryptedCell';
+import EditableCell from './editableCell';
+import EncryptedCell from './encryptedCell';
 
-type RenderColumn = (
-    value: any,
-    record: Certificate,
+export type RenderColumn<T = any> = (
+    value: T,
+    record: T,
     index: number,
 ) => ReactNode;
 
-export type Action = {
-    columnEncryption?: RenderColumn;
-    data?: RenderColumn;
+export type Action<T = any> = {
+    columnEncryption?: RenderColumn<T>;
+    data?: RenderColumn<T>;
 };
 
 interface CertificateTableProps {
@@ -25,7 +25,6 @@ interface CertificateTableProps {
     data: Certificate[];
     getClear: (encryption: Encryption, value: string) => () => Promise<any>;
     action?: Action;
-    renderAction?: RenderColumn;
 }
 
 function CertificateTable({
@@ -35,7 +34,6 @@ function CertificateTable({
     columnEncryption,
     data,
     action,
-    renderAction: customRenderAction,
     getClear,
 }: CertificateTableProps) {
     const renderContent =
@@ -124,7 +122,7 @@ function CertificateTable({
             title: '操作',
             key: 'action',
             width: 150,
-            render: customRenderAction ?? renderAction,
+            render: renderAction,
         },
     ];
 

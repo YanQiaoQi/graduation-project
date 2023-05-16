@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { DecryptCertificateProp } from "./type";
-import { Result } from "../../../../common/res";
-import * as FabricSDK from "../../../../services/fabric-sdk";
+import type { Result } from "../../../../common/type";
 import { cryptography } from "../../../../common/utils";
+import * as FabricSDK from "../../../../services/fabric-sdk";
 const certificateSecurityRouter = Router();
 
 // 加密
@@ -53,4 +53,4 @@ certificateSecurityRouter.post<
 	});
 });
 
-export default certificateSecurityRouter
+export default certificateSecurityRouter;
