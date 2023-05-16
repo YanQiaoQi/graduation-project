@@ -13,4 +13,7 @@
 # misc
 .DS_Store
 
+
+/upload
+
 # auth
