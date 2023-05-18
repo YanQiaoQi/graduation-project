@@ -3,10 +3,10 @@ import { Form, Button, DatePicker, Input, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { CERTIFICATE } from '@/common/constant';
-import { Certificate } from '@/common/type';
+import { Certificate, Evidence } from '@/common/type';
 
 interface CertificateFilterProps {
-    data: Certificate[];
+    data: Evidence[];
     setData: any;
 }
 
@@ -31,8 +31,8 @@ function CertificateFilter({ data, setData }: CertificateFilterProps) {
                     // 时间不符合
                     else if (
                         dateRange &&
-                        (dayjs(dateRange[0]).isAfter(file.created) ||
-                            dayjs(dateRange[1]).isBefore(file.created))
+                        (dayjs(dateRange[0]).isAfter(file.createTime) ||
+                            dayjs(dateRange[1]).isBefore(file.createTime))
                     ) {
                         console.log(file, '时间不符合');
                         return false;

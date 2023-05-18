@@ -1,5 +1,5 @@
 import { Card, Space, Spin, Empty } from 'antd';
-import { getMyApplications } from '@/service/certificate';
+import { getMyApplications } from '@/service/application';
 import useRequest from '@ahooksjs/use-request';
 import Container from '@/components/Container';
 import {

@@ -4,7 +4,7 @@ import {
 	Certificate,
 	ColumnEncryption,
 	Email,
-} from "../../../../common/type";
+} from "../../../common/type";
 
 export namespace Apply {
 	export type ReqParams = {

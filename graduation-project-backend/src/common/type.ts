@@ -1,3 +1,5 @@
+import { EvidenceFieldEncryptionMap } from "../services/fabric-sdk/type";
+
 export type Result<T = any> = {
 	status: number;
 	message?: string;
@@ -20,10 +22,7 @@ export type Certificate = {
 	last_updated: number;
 };
 
-export type ColumnEncryption = Record<
-	keyof Certificate,
-	Encryption
->;
+export type ColumnEncryption = EvidenceFieldEncryptionMap
 
 export type UserInfo = {
 	created: number;

@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { Router } from "express";
 import { DecryptCertificateProp } from "./type";
-import type { Result } from "../../../../common/type";
-import { cryptography } from "../../../../common/utils";
-import * as FabricSDK from "../../../../services/fabric-sdk";
+import type { Result } from "../../../common/type";
+import { cryptography } from "../../../common/utils";
+import * as FabricSDK from "../../../services/fabric-sdk";
 const certificateSecurityRouter = Router();
 
 // 加密

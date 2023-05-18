@@ -14,7 +14,7 @@ import {
     applyForDownload,
     download,
     DownloadArgus,
-} from '@/service/certificate';
+} from '@/service/application';
 import ExpandedTable from '../../components/CertificateTable/expandedTable';
 import { downloadFileByBlob } from '@/common/utils';
 

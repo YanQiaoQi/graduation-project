@@ -32,7 +32,7 @@ export function FormItemCaptcha({ interval = 60 }: props) {
             setIsPending(true);
             countdown(() => setIsPending(false));
             const email = formInstance.getFieldValue('email');
-            request.get(`${URL.AUTH.captcha}/${email}`);
+            request.get(`${URL.AUTH.captcha}/${encodeURIComponent(email)}`);
             message.success('发送验证码成功');
         });
     }, [formInstance]);

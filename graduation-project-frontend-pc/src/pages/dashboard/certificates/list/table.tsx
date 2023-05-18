@@ -3,26 +3,32 @@ import { Space, Form, Button } from 'antd';
 import { downloadFileByBlob } from '@/common/utils';
 import { URL } from '@/common/constant';
 import request from '@/common/request';
-import { Certificate, ColumnEncryption, Encryption } from '@/common/type';
+import {
+    Evidence,
+    ColumnEncryption,
+    Encryption,
+    EvidenceFieldEncryptionMap,
+} from '@/common/type';
 import FormModal from '../../../../components/FormModal';
 import Table from '../../components/CertificateTable/index';
+import {
+    deleteEvidence,
+    downloadEvidence,
+    updateEvidence,
+} from '@/service/evidence';
 
 interface CertificateTableProps {
     loading: boolean;
-    columnEncryption: ColumnEncryption;
-    setColumnEncryption: Function;
-    data: Certificate[];
+    columnEncryption?: EvidenceFieldEncryptionMap;
+    data?: Evidence[];
     getData: Function;
-    setData: Function;
 }
 
 function CertificateTable({
     loading,
     columnEncryption,
-    setColumnEncryption,
     data,
     getData,
-    setData,
 }: CertificateTableProps) {
     const [editingKey, setEditingKey] = useState<string>('');
 
@@ -33,44 +39,36 @@ function CertificateTable({
     const authModal = FormModal({ form: modalForm });
 
     const deleteCertificate = useCallback(
-        (index) => () => {
-            authModal((res) =>
-                request
-                    .delete(`${URL.CERTIFICATE}/${index}`, {
-                        data: res,
-                    })
-                    .then((res) => {
-                        if (res.code === 1) {
-                            getData();
-                        }
-                        return res;
-                    }),
+        (id) => () => {
+            authModal().then(() =>
+                deleteEvidence(id).then(() => {
+                    getData();
+                }),
             );
         },
         [],
     );
-
-    const dowloadCertificate = useCallback(
-        (index: number, name: string) => () => {
-            authModal((res) =>
-                request
-                    .get(`${URL.CERTIFICATE}/download/${index}`, {
-                        responseType: 'blob',
-                        data: res,
-                    })
-                    .then((res) => {
-                        downloadFileByBlob(res, name);
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                    }),
+    const restoreCertificate = useCallback(
+        (id) => () => {
+            authModal().then(() =>
+                updateEvidence(id, {
+                    isDelete: 0,
+                }).then(() => {
+                    getData();
+                }),
             );
+        },
+        [],
+    );
+    const dowloadCertificate = useCallback(
+        (id: number, name: string) => () => {
+            authModal().then(() => downloadEvidence(id, name));
         },
         [],
     );
 
     const onEdit = useCallback(
-        (record: Partial<Certificate>) => () => {
+        (record: Partial<Evidence>) => () => {
             form.setFieldsValue(columnEncryption);
             setEditingKey(record.name ?? '');
         },
@@ -78,14 +76,12 @@ function CertificateTable({
     );
 
     const onEditOk = useCallback(() => {
-        authModal((res) =>
+        authModal().then((res) =>
             request
                 .post(`${URL.CERTIFICATE}/encrypt`, {
                     data: form.getFieldsValue(),
                 })
                 .then((res) => {
-                    setData(res.data.certificates);
-                    setColumnEncryption(res.data.columnEncryption);
                     setEditingKey('');
                 }),
         );
@@ -98,7 +94,7 @@ function CertificateTable({
     const onDecrypt = useCallback(
         (encryption: Encryption, value: string) => () => {
             const cipher = encodeURIComponent(value);
-            return authModal((res) => {
+            return authModal().then((res) => {
                 return request.post(
                     `${URL.CERTIFICATE}/decrypt/${encryption}/${cipher}`,
                     {
@@ -111,7 +107,7 @@ function CertificateTable({
     );
 
     const action = {
-        columnEncryption: (value: any, record: Certificate, index: number) => {
+        columnEncryption: (value: any, record: Evidence, index: number) => {
             // 正在修改
             if (record.name === editingKey) {
                 return (
@@ -134,27 +130,36 @@ function CertificateTable({
                 );
             }
         },
-        data: (value: any, record: Certificate, index: number) => {
+        data: (_: any, record: Evidence) => {
             // 数据展示行
-            const { name, extension, encryption } = record;
-            const originalName = `${name}.${extension}`;
+            const { name, extension, id, isDelete } = record;
             return (
                 <Space size="middle">
                     <Button
                         type="link"
                         size="small"
-                        onClick={dowloadCertificate(index - 1, originalName)}
+                        onClick={dowloadCertificate(id, `${name}.${extension}`)}
                     >
                         下载
                     </Button>
-                    <Button
-                        type="link"
-                        size="small"
-                        danger
-                        onClick={deleteCertificate(index - 1)}
-                    >
-                        删除
-                    </Button>
+                    {isDelete ? (
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={restoreCertificate(id)}
+                        >
+                            恢复
+                        </Button>
+                    ) : (
+                        <Button
+                            type="link"
+                            size="small"
+                            danger
+                            onClick={deleteCertificate(id)}
+                        >
+                            删除
+                        </Button>
+                    )}
                 </Space>
             );
         },

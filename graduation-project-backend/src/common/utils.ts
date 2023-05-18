@@ -6,6 +6,10 @@ import {
 	ColumnEncryption,
 	Encryption,
 } from "./type";
+import {
+	Evidence,
+	EvidenceFieldEncryptionMap,
+} from "../services/fabric-sdk/type";
 
 export function getRandom6Num() {
 	return parseInt(String(Math.random() * 1000000));
@@ -37,8 +41,7 @@ export async function writeEncryptedFile(
 ) {
 	try {
 		if (encryption === "clear") {
-			writeFile(targetPath, buffer, "utf8");
-			return;
+			return writeFile(targetPath, buffer, "utf8");
 		}
 		const data = buffer.toString(
 			getBufferEncoding(targetPath)
@@ -50,12 +53,11 @@ export async function writeEncryptedFile(
 			padding: CryptoJS.pad.Pkcs7,
 		});
 
-		writeFile(
+		return writeFile(
 			targetPath,
 			dataAfterEncryption.toString(),
 			"utf8"
 		);
-		console.log("加密写入成功");
 	} catch (e) {
 		console.log("加密写入失败:", e);
 	}
@@ -101,21 +103,21 @@ function decryptText(
 	return decryptUtf8;
 }
 
-function encryptCertificate(
-	certificate: Certificate,
-	columnEncryption: ColumnEncryption,
-	prevColumnEncryption?: ColumnEncryption
+function encryptEvidence(
+	certificate: Evidence,
+	columnEncryption: EvidenceFieldEncryptionMap,
+	prevColumnEncryption?: EvidenceFieldEncryptionMap
 ) {
 	for (let key in columnEncryption) {
 		if (
 			columnEncryption.hasOwnProperty(key) &&
 			certificate.hasOwnProperty(key)
 		) {
-			const prop = key as keyof Certificate;
+			const prop = key as keyof EvidenceFieldEncryptionMap;
 			const encryption = columnEncryption[prop];
 			const prevEncryption = prevColumnEncryption?.[prop];
 			let value = certificate[prop];
-			if (prevEncryption) {
+			if (prevEncryption && value) {
 				value = decryptText(prevEncryption, value);
 			}
 			// @ts-ignore
@@ -124,16 +126,16 @@ function encryptCertificate(
 	}
 }
 
-function decryptCertificate(
-	certificate: Certificate,
-	columnEncryption: ColumnEncryption
+function decryptEvidence(
+	certificate: Evidence,
+	columnEncryption: EvidenceFieldEncryptionMap
 ) {
 	for (let key in columnEncryption) {
 		if (
 			columnEncryption?.hasOwnProperty(key) &&
 			certificate?.hasOwnProperty(key)
 		) {
-			const prop = key as keyof Certificate;
+			const prop = key as keyof EvidenceFieldEncryptionMap;
 			const encryption = columnEncryption[prop];
 			let value = certificate[prop];
 			// @ts-ignore
@@ -175,7 +177,7 @@ export const cryptography = {
 		},
 		// 源文本 -> 加密文本
 		text: encryptText,
-		certificate: encryptCertificate,
+		evidence: encryptEvidence,
 	},
 	decrypt: {
 		// 加密文件 -> 解密后 流
@@ -203,6 +205,6 @@ export const cryptography = {
 		},
 		// 加密后文本 -> 解密后文本
 		text: decryptText,
-		certificate: decryptCertificate,
+		evidence: decryptEvidence,
 	},
 };

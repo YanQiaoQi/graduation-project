@@ -2,6 +2,7 @@ import {
 	X509Identity,
 	Wallets,
 	Gateway,
+	Contract,
 } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
 import { ccp, walletPath, CA_DOMAIN } from "./common";
@@ -15,8 +16,21 @@ import {
 	ArrayPropOfUser,
 	ItemType,
 	Email,
-	Ledger,
+	Result,
 } from "../../common/type";
+import {
+	Evidence,
+	Ledger,
+	Users,
+	User as NewUser,
+	Meta,
+	EvidenceType,
+	EvidenceEncryption,
+} from "./type";
+import {
+	cryptography,
+	splitFileName,
+} from "../../common/utils";
 
 const userId = "appUser";
 
@@ -136,13 +150,13 @@ async function registerUser(id: string) {
 type InvokeArgus = {
 	id?: string;
 	func: string;
-	argus: any[];
+	argus?: string[];
 };
 
 async function invoke({
 	id = userId,
 	func,
-	argus,
+	argus = [],
 }: InvokeArgus) {
 	try {
 		const wallet = await Wallets.newFileSystemWallet(
@@ -201,7 +215,7 @@ export async function set(
 
 export async function get(
 	key: string
-): Promise<FabricResWithData<User>> {
+): Promise<FabricRes<User>> {
 	return invoke({
 		func: "queryDataHash",
 		argus: [key],
@@ -219,26 +233,6 @@ export async function get(
 		return {
 			code: 0,
 			message: "没有",
-			data: {
-				password: "",
-				info: {
-					created: Date.now(),
-				},
-				columnEncryption: {
-					name: "clear",
-					type: "clear",
-					encryption: "clear",
-					created: "clear",
-					size: "clear",
-					description: "clear",
-					extension: "clear",
-					last_updated: "clear",
-				},
-				certificates: [],
-				othersApplications: [],
-				myApplications: [],
-				authorizedCertificates: {},
-			},
 		};
 	});
 }
@@ -251,7 +245,7 @@ export function addItems(prop: ArrayPropOfUser) {
 		const { data: user } = await get(key);
 		//@ts-ignore
 		user[prop].push(...items);
-		await set(key, user);
+		await set(key, user!);
 		return {
 			code: 1,
 			message: "证据更新成功",
@@ -267,7 +261,7 @@ export function deleteItem(prop: ArrayPropOfUser) {
 		const { data: user } = await get(key);
 		//@ts-ignore
 		user[prop].splice(index, 1);
-		await set(key, user);
+		await set(key, user!);
 		return {
 			code: 1,
 			message: "证据删除成功",
@@ -283,7 +277,7 @@ export function getItem<T = any>(prop: ArrayPropOfUser) {
 		const { data: user } = await get(key);
 		return {
 			code: 1,
-			data: user[prop][index] as T,
+			data: user?.[prop][index] as T,
 			message: "证据删除成功",
 		};
 	};
@@ -343,7 +337,7 @@ export async function isAuthorized(
 	password: string
 ): Promise<FabricRes> {
 	const { data: user } = await get(key);
-	if (password === user.password) {
+	if (password === user?.password) {
 		return {
 			code: 1,
 			message: "鉴权成功",
@@ -368,26 +362,28 @@ export async function getCertificates(
 		message: "证据查询成功",
 		data: {
 			columnEncryption: user?.columnEncryption,
-			certificates: user.certificates,
+			certificates: user?.certificates,
 		},
 	};
 }
 
-export async function getLedger(): Promise<Ledger> {
+export async function getLedger() {
 	const data = await invoke({
 		func: "queryAllDataHash",
 		argus: [],
 	});
-	const ledger = JSON.parse(
-		data?.toString("utf-8") ?? "{}"
-	);
-	for (let key in ledger) {
-		const user = JSON.parse(
-			JSON.parse(ledger[key])
-		) as User;
-		ledger[key] = user;
-	}
-	return ledger;
+	console.log(data);
+
+	// const ledger = JSON.parse(
+	// 	data?.toString("utf-8") ?? "{}"
+	// );
+	// for (let key in ledger) {
+	// 	const user = JSON.parse(
+	// 		JSON.parse(ledger[key])
+	// 	) as User;
+	// 	ledger[key] = user;
+	// }
+	// return ledger;
 }
 
 /**
@@ -440,21 +436,261 @@ export async function updateColumnEncryption(
 	columnEncryption: ColumnEncryption
 ): Promise<FabricRes> {
 	const { data: user } = await get(key);
-	user.columnEncryption = columnEncryption;
-	await set(key, user);
+	user!.columnEncryption = columnEncryption;
+	await set(key, user!);
 	return {
 		code: 1,
 		message: "更新成功",
 	};
 }
 
-export async function init() {
-	const channel = "mychannel";
-	const chaincode = "myapp";
-	await enrollAdmain();
-	await registerUser(userId);
+class Fabric {
+	constructor() {
+		this.init();
+	}
+	async init() {
+		await enrollAdmain();
+		await registerUser(this.basic.userId);
+		this.contract = await this.fetchContract();
+		this.ledger = await this.fetchLedger();
+	}
+	basic = {
+		userId: "appUser",
+		channel: "mychannel",
+		chaincode: "myapp",
+	};
+
+	// 账本
+	ledger?: Ledger;
+	private async fetchLedger(): Promise<Ledger> {
+		const buffer = await this.invoke({
+			func: "queryAllDataHash",
+		});
+		const ledger = JSON.parse(
+			buffer?.toString("utf-8") ?? "{}"
+		);
+		for (let key in ledger) {
+			const value = JSON.parse(JSON.parse(ledger[key]));
+			ledger[key] = value;
+		}
+
+		console.log("远程账本", ledger);
+
+		return {
+			meta: ledger.meta ?? {
+				evidence: {
+					num: 0,
+				},
+			},
+			users: ledger.users ?? {},
+			evidences: ledger.evidences ?? [],
+		};
+	}
+
+	// 智能合约
+	private contract?: Contract;
+	private async fetchContract() {
+		const wallet = await Wallets.newFileSystemWallet(
+			walletPath
+		);
+
+		const identity = await wallet.get(this.basic.userId);
+		if (!identity) {
+			console.log(
+				"An identity for the user id does not exist in the wallet"
+			);
+			return;
+		}
+
+		const gateway = new Gateway();
+		await gateway.connect(ccp, {
+			wallet,
+			identity: this.basic.userId,
+			discovery: { enabled: true, asLocalhost: true },
+		});
+
+		const network = await gateway.getNetwork(
+			this.basic.channel
+		);
+
+		return network.getContract(this.basic.chaincode);
+	}
+	private async invoke({ func, argus = [] }: InvokeArgus) {
+		try {
+			if (!this.contract) {
+				this.contract = await this.fetchContract();
+			}
+			const FabricRes =
+				await this.contract?.submitTransaction(
+					func,
+					...argus
+				);
+
+			console.log(`Transaction has been submitted`);
+
+			return FabricRes;
+		} catch (error) {
+			console.error(
+				`Invoke Error: Failed to submit transaction: ${error}`
+			);
+		}
+	}
+
+	// 远程账本
+	private async setRemoteLedger(
+		key: keyof Ledger,
+		value: Users | Evidence[] | Meta
+	): Promise<FabricRes> {
+		return this.invoke({
+			func: "storeDataHash",
+			argus: [key, JSON.stringify(value)],
+		})
+			.then(() => {
+				return {
+					code: 1,
+					message: "设置成功",
+				} as FabricRes;
+			})
+			.catch(() => {
+				return {
+					code: 0,
+					message: "设置失败",
+				};
+			});
+	}
+	batchUpdate = 0;
+	private shouldUpdateRemoteLedger() {
+		this.batchUpdate++;
+		if (this.batchUpdate === 3) {
+			this.batchUpdate = 0;
+			return true;
+		}
+		return false;
+	}
+	private async updateRemoteLedger(
+		props: (keyof Ledger)[]
+	) {
+		try {
+			if (this.shouldUpdateRemoteLedger()) {
+				console.log("更新账本", this.ledger);
+				for (let key in this.ledger) {
+					if (!this.ledger.hasOwnProperty(key)) continue;
+					const ledgerKey = key as keyof Ledger;
+					await this.setRemoteLedger(
+						ledgerKey,
+						this.ledger[ledgerKey]
+					);
+				}
+			} else {
+				for (let prop of props) {
+					await this.setRemoteLedger(
+						prop,
+						this.ledger![prop]
+					);
+				}
+			}
+		} catch (error) {
+			console.log("updateRemoteLedger", error);
+		}
+	}
+
+	// users
+	async createUser(userId: Email, password: string) {
+		if (this.ledger!.users[userId]) return;
+		this.ledger!.users[userId] = {
+			password,
+			createTime: Date.now(),
+			EvidenceFieldEncryptionMap: {
+				name: "clear",
+				type: "clear",
+				encryption: "clear",
+				createTime: "clear",
+				size: "clear",
+				description: "clear",
+				extension: "clear",
+			},
+		};
+		await this.updateRemoteLedger(["users"]);
+	}
+	getUser(userId: Email) {
+		return this.ledger?.users[userId];
+	}
+
+	// evidences
+	async createEvidences(
+		files: Express.Multer.File[],
+		meta: {
+			creatorId: Email;
+			type: EvidenceType;
+			description: string;
+			encryption: EvidenceEncryption;
+			isPrivate: 0 | 1;
+		}
+	) {
+		const user = fabric.getUser(meta.creatorId);
+		if (!user) return;
+		const evidences: Evidence[] = files?.map(
+			({ buffer, originalname, size }) => {
+				const createTime = Date.now();
+				const updateTime = createTime;
+				const [name, extension] =
+					splitFileName(originalname);
+				const evidence: Evidence = {
+					id: fabric.getEvidenceId(),
+					name,
+					size,
+					extension,
+					createTime,
+					updateTime,
+					isDelete: 0,
+					...meta,
+				};
+				cryptography.encrypt.evidence(
+					evidence,
+					user.EvidenceFieldEncryptionMap
+				);
+				return evidence;
+			}
+		);
+		this.ledger?.evidences.push(...evidences);
+		await this.updateRemoteLedger(["evidences", "meta"]);
+	}
+	async deleteEvidence(id: number) {
+		const evidence = this.getEvidence(id);
+		if (!evidence) return;
+		evidence.isDelete = 1;
+		await this.updateRemoteLedger(["evidences", "meta"]);
+	}
+	async updateEvidence(
+		id: number,
+		newEvidence: Partial<Evidence>
+	) {
+		const evidence = this.getEvidence(id);
+		if (!evidence) return;
+		for (let key in newEvidence) {
+			// @ts-ignore
+			evidence[key] = newEvidence[key];
+		}
+		await this.updateRemoteLedger(["evidences"]);
+	}
+	getEvidenceId() {
+		const id = this.ledger!.meta.evidence.num;
+		this.ledger!.meta.evidence.num++;
+		return id;
+	}
+	getEvidence(id: number) {
+		return this.ledger?.evidences.find(
+			(item) => item.id === id
+		);
+	}
+	getEvidences(userId: Email) {
+		return this.ledger?.evidences.filter(
+			(e) => e.creatorId === userId
+		);
+	}
+	getAllEvidences() {}
 }
 
-class Fabric {
-	constructor() {}
-}
+const fabric = new Fabric();
+
+export default fabric;

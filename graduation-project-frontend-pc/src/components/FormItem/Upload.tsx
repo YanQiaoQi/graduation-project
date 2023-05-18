@@ -1,11 +1,12 @@
 import { message, Upload as AntdUpload, UploadProps } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { FormItem, FormItemProps } from './template';
-import { CertificateType, CERTIFICATE } from '@/common/constant';
+import { CERTIFICATE } from '@/common/constant';
+import { EvidenceType } from '@/common/type';
 import { UploadChangeParam } from 'antd/es/upload';
 
 interface MyUploadProps extends FormItemProps {
-    type?: CertificateType;
+    type?: EvidenceType;
     maxCount?: number;
 }
 
@@ -15,7 +16,7 @@ export function FormItemUpload({
     ...restProps
 }: MyUploadProps) {
     message.config({
-        maxCount: 5,
+        maxCount,
     });
     const uploadProps: UploadProps = {
         name: 'file',
@@ -92,7 +93,7 @@ export function FormItemUpload({
             getValueFromEvent={normFile}
             extra={extra}
         >
-            <AntdUpload.Dragger {...uploadProps} key={type}>
+            <AntdUpload.Dragger key={type} {...uploadProps}>
                 <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                 </p>

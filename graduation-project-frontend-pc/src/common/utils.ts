@@ -1,59 +1,11 @@
 import { message as AntdMessage } from 'antd';
-import request from './request';
 import dayjs from 'dayjs';
 import { CERTIFICATE } from './constant';
-import { Certificate, CertificateType } from './type';
+import { Certificate, Evidence, EvidenceType, Result } from './type';
 
 export function navigateTo(path: string) {
     location.pathname = path;
 }
-
-export function onNavigateTO(path: string) {
-    return function () {
-        location.pathname = path;
-    };
-}
-
-interface Result<T = any> {
-    code: 0 | 1;
-    message: string;
-    payload: T;
-    token?: string;
-}
-
-type Handler = (value: any) => void;
-
-export async function showMessage(res: Result) {
-    const { code, message } = res ?? { code: 1, message: '成功' };
-    const messageType = code ? 'success' : 'error';
-    const messageDuration = code ? 1 : 3;
-    return AntdMessage.open({
-        type: messageType,
-        content: message,
-        duration: messageDuration,
-    }).then(() => (code ? Promise.resolve(res) : Promise.reject(res)));
-}
-
-export const onAuthFormFinish =
-    (url: string, path: string, cb?: (res: Result) => void): Handler =>
-    (values) => {
-        const messageKey = 'message';
-        AntdMessage.open({
-            key: messageKey,
-            type: 'loading',
-            content: '',
-        });
-        request
-            .post<Result>(url, { data: values })
-            .then(showMessage)
-            .then((res) => {
-                cb?.(res);
-                navigateTo(path);
-            })
-            .catch((e) => {
-                console.log(`${e.message}`);
-            });
-    };
 
 export function getFormData(
     obj: Record<string, string | Blob | string[] | Blob[]>,
@@ -86,29 +38,28 @@ export function downloadFileByBlob(blob: Blob, filename: string) {
     window.URL.revokeObjectURL(blobURL);
 }
 
-function pow1024(num: number) {
-    return Math.pow(1024, num);
-}
-
-const formatByte = (size: number) => {
+function formatByte(size: number) {
+    function pow1024(num: number) {
+        return Math.pow(1024, num);
+    }
     if (!size) return '';
     if (size < pow1024(1)) return size + ' B';
     if (size < pow1024(2)) return (size / pow1024(1)).toFixed(2) + ' KB';
     if (size < pow1024(3)) return (size / pow1024(2)).toFixed(2) + ' MB';
     if (size < pow1024(4)) return (size / pow1024(3)).toFixed(2) + ' GB';
     return (size / pow1024(4)).toFixed(2) + ' TB';
-};
+}
 
-export function format(type: keyof Certificate) {
+export function format(type: keyof Evidence) {
     switch (type) {
-        case 'created': {
+        case 'createTime': {
             return (value: string) => {
                 const res = dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
                 return res === 'Invalid Date' ? value : res;
             };
         }
         case 'type': {
-            return (value: CertificateType) => CERTIFICATE.TYPE_TO_TEXT[value];
+            return (value: EvidenceType) => CERTIFICATE.TYPE_TO_TEXT[value];
         }
         case 'size': {
             return (value: string) => formatByte(parseInt(value));
@@ -119,20 +70,20 @@ export function format(type: keyof Certificate) {
     }
 }
 
-// export const MessageWrapper =
-//     <Func extends (...args: Parameters<Func>) => any>(service: Func) =>
-//     (...argus: Parameters<Func>) => {
-//         AntdMessage.open({
-//             type: 'loading',
-//             content: '',
-//         });
-//         return service(...argus).then(showMessage);
-//     };
-
-export const MessageWrapper = async <T extends Result>(promise: Promise<T>) => {
+export const MessageWrapper = async <T = any>(service: Promise<Result<T>>) => {
     AntdMessage.open({
+        key: 'message',
         type: 'loading',
+        duration: 10,
         content: '请稍等',
     });
-    return promise.then(showMessage);
+    return service.then((res: Result<T>) => {
+        AntdMessage.open({
+            key: 'message',
+            type: res.code ? 'success' : 'error',
+            duration: res.code ? 1 : 3,
+            content: res.message,
+        });
+        return Promise[res.code ? 'resolve' : 'reject'](res.data);
+    });
 };

@@ -1,19 +1,21 @@
 import React from 'react';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
 import { LaptopOutlined, UserOutlined } from '@ant-design/icons';
-import { ColumnEncryption } from './type';
+import { ColumnEncryption, EvidenceFieldEncryptionMap } from './type';
 
-const BASIC_URL = 'http://localhost:3000/v1';
+const version = 2;
+
+const BASIC_URL = `http://localhost:3000/v${version}`;
 
 // URL
 
 export const URL = {
     AUTH: {
-        loginByPwd: `${BASIC_URL}/auth/login/pwd`,
-        loginByCaptcha: `${BASIC_URL}/auth/login/captcha`,
-        signup: `${BASIC_URL}/auth/signup`,
-        captcha: `${BASIC_URL}/auth/captcha`,
-        resetPwd: `${BASIC_URL}/auth/resetPwd`,
+        loginByPwd: `${BASIC_URL}/user/login/pwd`,
+        loginByCaptcha: `${BASIC_URL}/user/login/captcha`,
+        signup: `${BASIC_URL}/user/signup`,
+        captcha: `${BASIC_URL}/user/captcha`,
+        resetPwd: `${BASIC_URL}/user/resetPwd`,
     },
     CERTIFICATE: `${BASIC_URL}/certificate`,
     USER: `${BASIC_URL}/user`,
@@ -109,19 +111,19 @@ export const ENCRYPTION: a = {
     ITEMS_MAP: ENCRYPTION_ITEMS_MAP,
 };
 
-export const defaultColumnEncryption: ColumnEncryption = {
+export const defaultColumnEncryption: EvidenceFieldEncryptionMap = {
     name: 'clear',
     type: 'clear',
     encryption: 'clear',
-    created: 'clear',
     size: 'clear',
     description: 'clear',
     extension: 'clear',
+    createTime: 'clear',
 };
 
 type Page = 'NAV' | 'SIDER';
 
-export const PAGE_ITEMS: Record<Page, ItemType[]> = {
+export const PAGE_ITEMS = {
     NAV: [`1`, `2`, `3`].map((key) => ({
         key,
         label: `nav ${key}`,

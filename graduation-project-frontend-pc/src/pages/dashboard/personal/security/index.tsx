@@ -1,8 +1,7 @@
-import { Card, Tabs, Button, Descriptions, Tag } from 'antd';
+import { Card } from 'antd';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import request from '@/common/request';
 import { URL } from '@/common/constant';
-import { onNavigateTO } from '@/common/utils';
 
 interface SecurityPageProps {}
 

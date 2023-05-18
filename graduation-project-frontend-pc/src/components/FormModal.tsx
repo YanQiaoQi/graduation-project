@@ -1,7 +1,6 @@
-import { Modal as AntdModal, Form, message } from 'antd';
+import { Modal as AntdModal, Form } from 'antd';
 import FormItem from '@/components/FormItem';
 import { FormInstance } from 'antd/es/form/Form';
-import { showMessage } from '@/common/utils';
 import { ReactNode } from 'react';
 
 interface FormModalPrps {
@@ -15,7 +14,7 @@ function FormModal<T>({
     formChildren,
     title = '请输入密码',
 }: FormModalPrps) {
-    return (onfulfilled: (value: T) => any) =>
+    return () =>
         new Promise((resolve, reject) => {
             AntdModal.confirm({
                 title,
@@ -27,10 +26,6 @@ function FormModal<T>({
                         onFinish={(value) => {
                             resolve(value);
                             form.resetFields();
-                            message.open({
-                                type: 'loading',
-                                content: '',
-                            });
                         }}
                         style={{ marginTop: 12, marginBottom: -16 }}
                     >
@@ -43,10 +38,7 @@ function FormModal<T>({
                     });
                 },
             });
-        })
-            // @ts-ignore
-            .then(onfulfilled)
-            .then(showMessage);
+        });
 }
 
 export default FormModal;

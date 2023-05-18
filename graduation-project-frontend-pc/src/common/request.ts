@@ -3,7 +3,11 @@ import { navigateTo } from './utils';
 
 request.interceptors.request.use((url, options) => {
     // auth 不做处理
-    if (/^.*\/v1\/auth\/.*/.test(url)) {
+    if (
+        /^.*\/v2\/user\/signup.*/.test(url) ||
+        /^.*\/v2\/user\/login\/.*/.test(url) ||
+        /^.*\/v2\/user\/captcha\/.*/.test(url)
+    ) {
         return {
             url,
             options,
@@ -41,12 +45,5 @@ request.interceptors.response.use(async (res) => {
     } catch {}
     return res;
 });
-
-// request.use((ctx, next) => {
-//     if()
-//     ctx.req.options
-// });
-
-// request.interceptors.request.use(())
 
 export default request;

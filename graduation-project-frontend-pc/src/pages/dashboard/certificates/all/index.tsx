@@ -5,7 +5,7 @@ import { UserContext } from '@/common/contexts';
 import {
     getAllCertificates,
     getAuthorizedApplication,
-} from '@/service/certificate';
+} from '@/service/application';
 import Table from './allUsersTable';
 import AuthedTable from './authTable';
 

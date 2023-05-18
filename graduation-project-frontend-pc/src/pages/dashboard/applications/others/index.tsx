@@ -13,7 +13,7 @@ import dayjs from 'dayjs';
 import {
     getOthersApplications,
     processApplication,
-} from '@/service/certificate';
+} from '@/service/application';
 import useRequest from '@ahooksjs/use-request';
 import Container from '@/components/Container';
 import { format } from '@/common/utils';

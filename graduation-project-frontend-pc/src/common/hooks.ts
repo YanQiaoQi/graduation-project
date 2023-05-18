@@ -1,15 +1,12 @@
 import { useState } from 'react';
+import useRequest from '@ahooksjs/use-request';
+import { isAuthorized } from '@/service/user';
 
 export type User = {
-    email: string | undefined;
+    email?: string;
 };
 
 export function useUser() {
-    const [user, setUser] = useState<User>({
-        email: undefined,
-    });
-    function update(values: Partial<User>) {
-        setUser({ ...user, ...values });
-    }
-    return [user, update] as [User, (values: Partial<User>) => void];
+    const { data: user } = useRequest(isAuthorized);
+    return [user ?? { email: undefined }];
 }

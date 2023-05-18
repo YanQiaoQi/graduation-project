@@ -1,7 +1,11 @@
 import { useMemo, ReactNode, useCallback } from 'react';
 import { Table } from 'antd';
 import { ENCRYPTION } from '@/common/constant';
-import { Certificate, Encryption } from '@/common/type';
+import {
+    Evidence,
+    Encryption,
+    EvidenceFieldEncryptionMap,
+} from '@/common/type';
 import { format } from '@/common/utils';
 import EditableCell from './editableCell';
 import EncryptedCell from './encryptedCell';
@@ -21,8 +25,8 @@ interface CertificateTableProps {
     editable?: boolean;
     editingKey?: string;
     loading?: boolean;
-    columnEncryption: any;
-    data: Certificate[];
+    columnEncryption?: EvidenceFieldEncryptionMap;
+    data?: Evidence[];
     getClear: (encryption: Encryption, value: string) => () => Promise<any>;
     action?: Action;
 }
@@ -37,13 +41,15 @@ function CertificateTable({
     getClear,
 }: CertificateTableProps) {
     const renderContent =
-        (dataIndex: keyof Certificate) =>
+        (dataIndex: keyof Evidence) =>
         (render: Function) =>
-        (value: string, record: Certificate, index: number) => {
-            const isEncrypted = columnEncryption[dataIndex] !== 'clear';
+        (value: string, record: Evidence, index: number) => {
+            const encryption = (columnEncryption?.[dataIndex] ??
+                'clear') as Encryption;
+            const isEncrypted = encryption !== 'clear';
             // 列加密
             if (index === 0) {
-                return ENCRYPTION.VALUE_TO_LABEL[value];
+                return ENCRYPTION.VALUE_TO_LABEL[encryption];
             }
             // 已加密：显示密文
             if (isEncrypted) {
@@ -51,8 +57,7 @@ function CertificateTable({
                     <EncryptedCell
                         timeout={5000}
                         dataIndex={dataIndex}
-                        // @ts-ignore
-                        getClear={getClear(columnEncryption[dataIndex], value)}
+                        getClear={getClear(encryption, value)}
                     >
                         {value}
                     </EncryptedCell>
@@ -108,9 +113,33 @@ function CertificateTable({
         },
         {
             title: '创建时间',
-            dataIndex: 'created',
-            key: 'created',
+            dataIndex: 'createTime',
+            key: 'createTime',
             editable: editable,
+        },
+        {
+            title: '私有',
+            dataIndex: 'isPrivate',
+            key: 'isPrivate',
+            render: (value: 0 | 1, record: Evidence, index: number) => {
+                // 列加密
+                if (index === 0) {
+                    return ENCRYPTION.VALUE_TO_LABEL.clear;
+                }
+                return value ? '是' : '否';
+            },
+        },
+        {
+            title: '状态',
+            dataIndex: 'isDelete',
+            key: 'isDelete',
+            render: (value: 0 | 1, record: Evidence, index: number) => {
+                // 列加密
+                if (index === 0) {
+                    return ENCRYPTION.VALUE_TO_LABEL.clear;
+                }
+                return value ? '已删除' : '在线';
+            },
         },
         {
             title: '备注',
@@ -127,11 +156,11 @@ function CertificateTable({
     ];
 
     const mergedColumns = columns?.map((col) => {
-        const dataIndex = col.dataIndex as keyof Certificate;
+        const dataIndex = col.dataIndex as keyof Evidence;
         return {
             render: renderContent(dataIndex)(format(dataIndex)),
             ...col,
-            onCell: (record: Certificate, index?: number) => ({
+            onCell: (record: Evidence, index?: number) => ({
                 record,
                 dataIndex,
                 title: dataIndex,
@@ -143,8 +172,11 @@ function CertificateTable({
     });
 
     const mergedData = useMemo(() => {
-        const res: Certificate[] = [columnEncryption];
-        data.forEach((item) => {
+        if (!columnEncryption) return data;
+        const res: (Evidence | EvidenceFieldEncryptionMap)[] = [
+            columnEncryption,
+        ];
+        data?.forEach((item) => {
             res.push(item);
             if (res.length % pageSize === 0) {
                 res.push(columnEncryption);
@@ -155,8 +187,9 @@ function CertificateTable({
 
     return (
         <Table
-            rowKey={'created'}
+            rowKey={'id'}
             loading={loading}
+            // @ts-ignore
             columns={mergedColumns}
             dataSource={mergedData}
             components={{

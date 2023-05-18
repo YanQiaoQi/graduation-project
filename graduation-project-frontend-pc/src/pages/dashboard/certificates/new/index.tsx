@@ -1,19 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Form, Card } from 'antd';
+import { useEffect, useCallback } from 'react';
+import { Form, Card, Switch } from 'antd';
 import FormItem from '@/components/FormItem';
 import Container from '@/components/Container';
-import request from '@/common/request';
-import {
-    CertificateType,
-    CERTIFICATE,
-    URL,
-    ENCRYPTION_ITEMS_MAP,
-} from '@/common/constant';
-import { getFormData, navigateTo, showMessage } from '@/common/utils';
+import { CERTIFICATE, ENCRYPTION_ITEMS_MAP } from '@/common/constant';
+import { navigateTo } from '@/common/utils';
+import { EvidenceType } from '@/common/type';
+import { createEvidences } from '@/service/evidence';
 
 function CertificatesNewPage() {
     const [form] = Form.useForm();
-    const fileType = Form.useWatch<CertificateType>('type', form);
+    const fileType = Form.useWatch<EvidenceType>('type', form);
 
     useEffect(() => {
         form.setFieldsValue({
@@ -23,15 +19,9 @@ function CertificatesNewPage() {
     }, [fileType]);
 
     const onFormFinish = useCallback((values) => {
-        console.log(values);
-        request
-            .post(URL.CERTIFICATE, {
-                data: getFormData(values),
-            })
-            .then(showMessage)
-            .then(() => {
-                navigateTo('/dashboard/certificates/list');
-            });
+        createEvidences(values).then(() => {
+            navigateTo('/dashboard/certificates/list');
+        });
     }, []);
 
     return (
@@ -55,14 +45,21 @@ function CertificatesNewPage() {
                         required
                         label="加密类型"
                         name="encryption"
-                        // @ts-ignore
-                        items={ENCRYPTION_ITEMS_MAP[fileType] ?? []}
+                        items={ENCRYPTION_ITEMS_MAP[fileType]}
                     />
                     <FormItem.Input
                         required
                         label="证据描述"
                         name="description"
                     />
+                    <FormItem
+                        required
+                        label="私有证据"
+                        name="isPrivate"
+                        getValueFromEvent={(e) => Number(e)}
+                    >
+                        <Switch />
+                    </FormItem>
                     <FormItem.Upload
                         requiredMessage="请上传您的证据"
                         label="证据上传"

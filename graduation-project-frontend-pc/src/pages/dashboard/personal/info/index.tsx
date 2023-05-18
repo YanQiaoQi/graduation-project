@@ -1,8 +1,5 @@
 import { useEffect, useState, useMemo, useContext } from 'react';
 import { Button, Card, Descriptions, Tag } from 'antd';
-import request from '@/common/request';
-import { URL } from '@/common/constant';
-import { onNavigateTO } from '@/common/utils';
 import { UserContext } from '@/common/contexts';
 import dayjs from 'dayjs';
 

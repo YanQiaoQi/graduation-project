@@ -1,4 +1,4 @@
-import { Encryption } from "../../../../common/type";
+import { Encryption } from "../../../common/type";
 import { AuthReqBody } from "../interface";
 
 export namespace DecryptCertificateProp {

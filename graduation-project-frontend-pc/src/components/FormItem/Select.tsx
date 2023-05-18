@@ -15,7 +15,7 @@ interface FormItemSelectProps extends FormItemProps {
 export function FormItemSelect({
     type = 'select',
     name,
-    items,
+    items = [],
     ...restProps
 }: FormItemSelectProps) {
     let children = <></>;

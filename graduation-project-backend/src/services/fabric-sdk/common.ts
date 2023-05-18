@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-export const WSL_IP = "172.31.91.173";
+export const WSL_IP = "172.30.200.238";
 
 function getCcpAdaptedWSL(ccpPath: string, ip = WSL_IP) {
 	const originalCcpJson = fs.readFileSync(ccpPath, "utf8");

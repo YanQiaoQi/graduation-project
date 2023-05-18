@@ -1,24 +1,21 @@
-import { useMemo, useEffect, FC } from 'react';
+import { useMemo, FC } from 'react';
 import { Breadcrumb, Layout, Menu } from 'antd';
 import Container from '@/components/Container';
 import { navigateTo } from '@/common/utils';
-import { PAGE_ITEMS, URL } from '@/common/constant';
-import request from '@/common/request';
-import styles from './index.less';
+import { PAGE_ITEMS } from '@/common/constant';
 import { UserContext } from '@/common/contexts';
 import { useUser } from '@/common/hooks';
-import { getApplications } from '@/service/certificate';
+import styles from './index.less';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 const ConsolePage: FC = ({ children }) => {
-    const [user, setUser] = useUser();
+    const [user] = useUser();
 
-    const path = useMemo(() => {
-        const pathArr = location.pathname.split(`/`);
-        pathArr.shift();
-        return pathArr;
-    }, [location.pathname]);
+    const path = useMemo(
+        () => location.pathname.substring(1).split(`/`),
+        [location.pathname],
+    );
 
     const BreadcrumbItems = useMemo(() => {
         let href = ``;
@@ -36,34 +33,18 @@ const ConsolePage: FC = ({ children }) => {
         });
     }, [path]);
 
-    const SiderSelectedKey = useMemo(() => path[path.length - 1], [path]);
-
     const prefixCls = useMemo(() => 'console-index', []);
-
-    useEffect(() => {
-        request.get(`${URL.USER}/isAuthorized`).then(({ data }) => {
-            setUser(data);
-        });
-    }, []);
 
     return (
         <UserContext.Provider value={user}>
             <Layout className={styles[`${prefixCls}-container`]}>
-                <Sider
-                    collapsible
-                    // style={{ background: `#ffffff` }}
-                    // width={200}
-                >
+                <Sider collapsible>
                     <div className={styles[`${prefixCls}-header-logo`]} />
                     <Menu
                         theme="dark"
                         mode="inline"
-                        selectedKeys={[SiderSelectedKey]}
-                        defaultOpenKeys={PAGE_ITEMS.SIDER.map(
-                            // @ts-ignore
-                            ({ key }) => key,
-                        )}
-                        // style={{ height: `100%` }}
+                        selectedKeys={[path[path.length - 1]]}
+                        defaultOpenKeys={PAGE_ITEMS.SIDER.map(({ key }) => key)}
                         onClick={({ keyPath }) => {
                             const path = keyPath.reverse().join(`/`);
                             navigateTo(`/dashboard/${path}`);
@@ -74,7 +55,7 @@ const ConsolePage: FC = ({ children }) => {
                 <Layout>
                     <Header className={styles[`${prefixCls}-header-container`]}>
                         <div className={styles[`${prefixCls}-header-text`]}>
-                            {user.email}
+                            {user?.email}
                         </div>
                     </Header>
                     <Content

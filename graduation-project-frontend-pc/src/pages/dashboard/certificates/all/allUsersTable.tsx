@@ -8,7 +8,7 @@ import {
     LedgerItem,
 } from '@/common/type';
 import Table, { Action } from '../../components/CertificateTable/index';
-import { applyForDecrypt, applyForDownload } from '@/service/certificate';
+import { applyForDecrypt, applyForDownload } from '@/service/application';
 import ExpandedTable from '../../components/CertificateTable/expandedTable';
 
 interface AllPageProps extends TableProps<LedgerItem> {

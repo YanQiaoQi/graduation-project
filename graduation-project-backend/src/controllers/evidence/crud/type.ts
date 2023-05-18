@@ -1,19 +1,22 @@
-import { Encryption } from "../../../../common/type";
+import {
+	EvidenceEncryption,
+	EvidenceType,
+} from "../../../services/fabric-sdk/type";
 import { AuthReqBody } from "../interface";
 
 export namespace NewCertificate {
 	export type ReqBody = {
 		name: string;
-		type: string;
+		type: EvidenceType;
 		description: string;
-		encryption: Encryption;
+		encryption: EvidenceEncryption;
+		isPrivate: "0" | "1";
 		file: File[];
 	};
 }
 
 export namespace DeleteCertificate {
 	export type ReqParams = {
-		index: string;
+		id: string;
 	};
-	export type ReqBody = AuthReqBody;
 }

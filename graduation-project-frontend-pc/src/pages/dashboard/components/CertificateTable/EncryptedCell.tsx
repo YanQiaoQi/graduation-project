@@ -2,11 +2,11 @@ import { useState, useCallback, FC } from 'react';
 import { Button, Tooltip } from 'antd';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import Container from '@/components/Container';
-import { Certificate, Encryption } from '@/common/type';
+import { Certificate, Encryption, Evidence } from '@/common/type';
 import { format } from '@/common/utils';
 
 interface EncryptedCellProps {
-    dataIndex: keyof Certificate;
+    dataIndex: keyof Evidence;
     timeout?: number;
     children: string;
     getClear: () => Promise<any>;
