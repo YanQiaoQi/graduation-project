@@ -26,11 +26,15 @@ import {
 	Meta,
 	EvidenceType,
 	EvidenceEncryption,
+	EvidenceFieldEncryptionMap,
+	Application,
 } from "./type";
 import {
 	cryptography,
 	splitFileName,
+	writeEncryptedFile,
 } from "../../common/utils";
+import path from "path";
 
 const userId = "appUser";
 
@@ -484,6 +488,7 @@ class Fabric {
 			},
 			users: ledger.users ?? {},
 			evidences: ledger.evidences ?? [],
+			applications: ledger.applications ?? [],
 		};
 	}
 
@@ -539,7 +544,7 @@ class Fabric {
 	// 远程账本
 	private async setRemoteLedger(
 		key: keyof Ledger,
-		value: Users | Evidence[] | Meta
+		value: Users | Evidence[] | Meta | Application[]
 	): Promise<FabricRes> {
 		return this.invoke({
 			func: "storeDataHash",
@@ -572,7 +577,6 @@ class Fabric {
 	) {
 		try {
 			if (this.shouldUpdateRemoteLedger()) {
-				console.log("更新账本", this.ledger);
 				for (let key in this.ledger) {
 					if (!this.ledger.hasOwnProperty(key)) continue;
 					const ledgerKey = key as keyof Ledger;
@@ -589,6 +593,7 @@ class Fabric {
 					);
 				}
 			}
+			console.log("更新账本", this.ledger);
 		} catch (error) {
 			console.log("updateRemoteLedger", error);
 		}
@@ -600,7 +605,7 @@ class Fabric {
 		this.ledger!.users[userId] = {
 			password,
 			createTime: Date.now(),
-			EvidenceFieldEncryptionMap: {
+			evidenceFieldEncryptionMap: {
 				name: "clear",
 				type: "clear",
 				encryption: "clear",
@@ -635,6 +640,13 @@ class Fabric {
 				const updateTime = createTime;
 				const [name, extension] =
 					splitFileName(originalname);
+				writeEncryptedFile(
+					path.resolve(
+						`upload/${meta.creatorId}-${createTime}-${originalname}`
+					),
+					buffer,
+					meta.encryption
+				);
 				const evidence: Evidence = {
 					id: fabric.getEvidenceId(),
 					name,
@@ -647,7 +659,7 @@ class Fabric {
 				};
 				cryptography.encrypt.evidence(
 					evidence,
-					user.EvidenceFieldEncryptionMap
+					user.evidenceFieldEncryptionMap
 				);
 				return evidence;
 			}
@@ -669,7 +681,12 @@ class Fabric {
 		if (!evidence) return;
 		for (let key in newEvidence) {
 			// @ts-ignore
-			evidence[key] = newEvidence[key];
+			const newValue = newEvidence[key];
+			if (newValue === undefined || newValue === null) {
+				continue;
+			}
+			// @ts-ignore
+			evidence[key] = newValue;
 		}
 		await this.updateRemoteLedger(["evidences"]);
 	}
@@ -688,7 +705,73 @@ class Fabric {
 			(e) => e.creatorId === userId
 		);
 	}
-	getAllEvidences() {}
+	getAllEvidences() {
+		const res = [];
+		for (let userId in this.ledger?.users) {
+			const user = this.ledger?.users[userId];
+			const validEvidences = this.getEvidences(
+				userId
+			)?.filter((e) => !e.isPrivate && !e.isDelete);
+			if (validEvidences) {
+				res.push({
+					creator: userId,
+					evidences: validEvidences,
+					fieldEncryption: user?.evidenceFieldEncryptionMap,
+				});
+			}
+		}
+		return res;
+	}
+	async encryptEvidences(
+		userId: Email,
+		newEncryptionMap: EvidenceFieldEncryptionMap
+	) {
+		const creator = this.getUser(userId);
+		if (!creator) {
+			return false;
+		}
+		const evidences = this.getEvidences(userId);
+		if (!evidences) {
+			return false;
+		}
+		evidences.forEach((e) => {
+			cryptography.encrypt.evidence(
+				e,
+				newEncryptionMap,
+				creator.evidenceFieldEncryptionMap
+			);
+		});
+		creator.evidenceFieldEncryptionMap = newEncryptionMap;
+		await this.updateRemoteLedger(["users", "evidences"]);
+	}
+	decryptEvidencesField(
+		id: number,
+		field: keyof EvidenceFieldEncryptionMap,
+		applicantId?: Email
+	) {
+		const evidence = this.getEvidence(id);
+		if (!evidence) {
+			return false;
+		}
+		// 鉴权
+		if (false) {
+			return false;
+		}
+		const creator = this.getUser(evidence.creatorId);
+		if (!creator) {
+			return false;
+		}
+		return cryptography.decrypt.text(
+			creator.evidenceFieldEncryptionMap[field] ?? "clear",
+			evidence[field]
+		);
+	}
+
+	// application
+	async createApplication(application: Application) {
+		this.ledger?.applications.push(application);
+		await this.updateRemoteLedger(["applications"]);
+	}
 }
 
 const fabric = new Fabric();

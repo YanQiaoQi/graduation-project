@@ -7,11 +7,16 @@ import {
 	writeEncryptedFile,
 	splitFileName,
 	cryptography,
+	writeEncryptedFiles,
+	getEvidenceFromReqBody,
 } from "../../../common/utils";
 import { Result } from "../../../common/type";
 import fabric from "../../../services/fabric-sdk";
 import upload from "../../../middlewares/multer";
-import { Evidence } from "../../../services/fabric-sdk/type";
+import {
+	Evidence,
+	Status,
+} from "../../../services/fabric-sdk/type";
 
 const crudRouter = Router();
 
@@ -29,39 +34,6 @@ crudRouter.post<never, Result, NewCertificate.ReqBody>(
 			res.send(Res.fail("鉴权错误"));
 			return;
 		}
-
-		// // 信息存入
-		// const evidences: Evidence[] = files?.map(
-		// 	({ buffer, originalname, size }) => {
-		// 		const createTime = Date.now();
-		// 		const updateTime = createTime;
-		// 		const [name, extension] =
-		// 			splitFileName(originalname);
-		// 		writeEncryptedFile(
-		// 			path.resolve(
-		// 				`upload/${email}-${createTime}-${originalname}`
-		// 			),
-		// 			buffer,
-		// 			encryption
-		// 		);
-		// 		const evidence: Evidence = {
-		// 			id: fabric.getEvidenceId(),
-		// 			name,
-		// 			size,
-		// 			extension,
-		// 			type,
-		// 			description,
-		// 			encryption,
-		// 			createTime,
-		// 			updateTime,
-		// 		};
-		// 		cryptography.encrypt.evidence(
-		// 			evidence,
-		// 			user.EvidenceFieldEncryptionMap
-		// 		);
-		// 		return evidence;
-		// 	}
-		// );
 
 		await fabric.createEvidences(files, {
 			...req.body,
@@ -86,13 +58,12 @@ crudRouter.delete<DeleteCertificate.ReqParams, Result>(
 crudRouter.put<
 	DeleteCertificate.ReqParams,
 	Result,
-	Exclude<Partial<Evidence>, "id">
+	Partial<Record<Exclude<keyof Evidence, "id">, string>>
 >("/:id", async (req, res) => {
-	await fabric.updateEvidence(parseInt(req.params.id), {
-		...req.body,
-		isDelete: Number(req.body.isDelete) as 0 | 1,
-		isPrivate: Number(req.body.isPrivate) as 0 | 1,
-	});
+	await fabric.updateEvidence(
+		parseInt(req.params.id),
+		getEvidenceFromReqBody(req.body)
+	);
 	res.send(Res.success("修改成功"));
 });
 
@@ -111,7 +82,7 @@ crudRouter.get<never, Result>(
 			code: 1,
 			data: {
 				evidences,
-				fieldEncryption: user.EvidenceFieldEncryptionMap,
+				fieldEncryption: user.evidenceFieldEncryptionMap,
 			},
 		});
 	}
@@ -146,7 +117,7 @@ crudRouter.get(
 		}
 		cryptography.decrypt.evidence(
 			evidence,
-			creator.EvidenceFieldEncryptionMap
+			creator.evidenceFieldEncryptionMap
 		);
 		const absolutePath = path.resolve(
 			`upload/${evidence.creatorId}-${evidence.createTime}-${evidence.name}.${evidence.extension}`

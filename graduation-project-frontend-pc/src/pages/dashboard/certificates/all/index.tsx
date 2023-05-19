@@ -2,18 +2,16 @@ import { useContext, useMemo } from 'react';
 import { Card, Space } from 'antd';
 import useRequest from '@ahooksjs/use-request';
 import { UserContext } from '@/common/contexts';
-import {
-    getAllCertificates,
-    getAuthorizedApplication,
-} from '@/service/application';
+import { getAuthorizedApplication } from '@/service/application';
 import Table from './allUsersTable';
 import AuthedTable from './authTable';
+import { getAllEvidences } from '@/service/evidence';
 
 function AllPage() {
     const { email } = useContext(UserContext);
 
-    const { data: allUsersCertificates, loading: loading0 } =
-        useRequest(getAllCertificates);
+    const { data: allEvidences, loading: loading0 } =
+        useRequest(getAllEvidences);
 
     const { data: authorizedCertificates, loading: loading1 } = useRequest(
         getAuthorizedApplication,
@@ -40,7 +38,7 @@ function AllPage() {
                 <Table
                     user={email ?? ''}
                     loading={loading0}
-                    data={allUsersCertificates?.data}
+                    data={allEvidences}
                 />
             </Card>
         </Space>

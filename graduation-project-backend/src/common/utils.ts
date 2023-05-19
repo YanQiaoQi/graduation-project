@@ -1,14 +1,12 @@
 import { readFile, writeFile } from "fs/promises";
 import Path from "path";
 import CryptoJS from "crypto-js";
-import {
-	Certificate,
-	ColumnEncryption,
-	Encryption,
-} from "./type";
+import { Encryption } from "./type";
 import {
 	Evidence,
+	EvidenceEncryption,
 	EvidenceFieldEncryptionMap,
+	Status,
 } from "../services/fabric-sdk/type";
 
 export function getRandom6Num() {
@@ -63,6 +61,30 @@ export async function writeEncryptedFile(
 	}
 }
 
+type WriteEncryptedFilesArgus = {
+	files: Express.Multer.File[];
+	prefix: string;
+	encryption?: EvidenceEncryption;
+};
+
+export async function writeEncryptedFiles({
+	files,
+	prefix,
+	encryption = "clear",
+}: WriteEncryptedFilesArgus) {
+	return Promise.all(
+		files?.map(({ buffer, originalname }) =>
+			writeEncryptedFile(
+				Path.resolve(
+					`upload/${prefix}-${Date.now()}-${originalname}`
+				),
+				buffer,
+				encryption
+			)
+		)
+	);
+}
+
 function encryptText(
 	encryption: Encryption,
 	data: string | number
@@ -104,42 +126,42 @@ function decryptText(
 }
 
 function encryptEvidence(
-	certificate: Evidence,
+	evidence: Evidence,
 	columnEncryption: EvidenceFieldEncryptionMap,
 	prevColumnEncryption?: EvidenceFieldEncryptionMap
 ) {
 	for (let key in columnEncryption) {
 		if (
 			columnEncryption.hasOwnProperty(key) &&
-			certificate.hasOwnProperty(key)
+			evidence.hasOwnProperty(key)
 		) {
 			const prop = key as keyof EvidenceFieldEncryptionMap;
 			const encryption = columnEncryption[prop];
 			const prevEncryption = prevColumnEncryption?.[prop];
-			let value = certificate[prop];
+			let value = evidence[prop];
 			if (prevEncryption && value) {
 				value = decryptText(prevEncryption, value);
 			}
 			// @ts-ignore
-			certificate[prop] = encryptText(encryption, value);
+			evidence[prop] = encryptText(encryption, value);
 		}
 	}
 }
 
 function decryptEvidence(
-	certificate: Evidence,
+	evidence: Evidence,
 	columnEncryption: EvidenceFieldEncryptionMap
 ) {
 	for (let key in columnEncryption) {
 		if (
 			columnEncryption?.hasOwnProperty(key) &&
-			certificate?.hasOwnProperty(key)
+			evidence?.hasOwnProperty(key)
 		) {
 			const prop = key as keyof EvidenceFieldEncryptionMap;
 			const encryption = columnEncryption[prop];
-			let value = certificate[prop];
+			let value = evidence[prop];
 			// @ts-ignore
-			certificate[prop] = decryptText(encryption, value);
+			evidence[prop] = decryptText(encryption, value);
 		}
 	}
 }
@@ -208,3 +230,19 @@ export const cryptography = {
 		evidence: decryptEvidence,
 	},
 };
+
+export function getEvidenceFromReqBody(
+	reqBody: Partial<
+		Record<Exclude<keyof Evidence, "id">, string>
+	>
+) {
+	return {
+		...reqBody,
+		isDelete: reqBody.hasOwnProperty("isDelete")
+			? (Number(reqBody.isDelete) as Status)
+			: undefined,
+		isPrivate: reqBody.hasOwnProperty("isPrivate")
+			? (Number(reqBody.isPrivate) as Status)
+			: undefined,
+	} as Partial<Evidence>;
+}

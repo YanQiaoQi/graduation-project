@@ -1,57 +1,43 @@
-// @ts-nocheck
 import { Router } from "express";
 import { DecryptCertificateProp } from "./type";
 import type { Result } from "../../../common/type";
-import { cryptography } from "../../../common/utils";
-import * as FabricSDK from "../../../services/fabric-sdk";
-const certificateSecurityRouter = Router();
+import fabric from "../../../services/fabric-sdk";
+const securityRouter = Router();
 
 // 加密
-certificateSecurityRouter.post(
+securityRouter.post<never, Result>(
 	"/encrypt",
 	async function encryptCertificates(req, res) {
 		// @ts-ignore
 		const email = req.auth?.email;
-		const { data: user } = await FabricSDK.get(email);
-		const columnEncryption = req.body;
-		const prevColumnEncryption = user.columnEncryption;
-		user.columnEncryption = columnEncryption;
-		user.certificates.forEach((certificate) => {
-			cryptography.encrypt.certificate(
-				certificate,
-				columnEncryption,
-				prevColumnEncryption
-			);
-		});
-		await FabricSDK.set(email, user);
+		await fabric.encryptEvidences(email, req.body);
 		res.send({
 			status: 200,
 			code: 1,
-			data: {
-				columnEncryption,
-				certificates: user.certificates,
-			},
+			message: "加密成功",
 		});
 	}
 );
 
 // 解密
-certificateSecurityRouter.post<
+securityRouter.get<
 	DecryptCertificateProp.ReqParams,
-	Result,
-	DecryptCertificateProp.ReqBody
->("/decrypt/:encryption/:data", async (req, res) => {
+	Result
+>("/decrypt/:id/:field", async (req, res) => {
 	// @ts-ignore
 	const email = req.auth?.email;
-	const { encryption, data } = req.params;
-	const { password } = req.body;
-	await FabricSDK.isAuthorized(email, password);
+	const { id, field } = req.params;
+	const data = fabric.decryptEvidencesField(
+		Number(id),
+		field,
+		email
+	);
 	res.send({
 		status: 200,
 		code: 1,
-		data: cryptography.decrypt.text(encryption, data),
+		data,
 		message: "鉴权成功",
 	});
 });
 
-export default certificateSecurityRouter;
+export default securityRouter;

@@ -6,6 +6,8 @@ export type Email = string;
 
 export type Users = Record<Email, User>;
 
+export type Status = 0 | 1;
+
 export type EvidenceType =
 	| "video"
 	| "audio"
@@ -30,7 +32,7 @@ export type EvidenceFieldEncryptionMap = Record<
 export type User = {
 	password: string;
 	createTime: timeStamp;
-	EvidenceFieldEncryptionMap: EvidenceFieldEncryptionMap;
+	evidenceFieldEncryptionMap: EvidenceFieldEncryptionMap;
 };
 
 export type Evidence = {
@@ -52,9 +54,9 @@ export type Evidence = {
 	createTime: timeStamp | Cipher;
 	updateTime: timeStamp;
 	// 是否已经删除
-	isDelete: 0 | 1;
+	isDelete: Status;
 	// 是否私有
-	isPrivate: 0 | 1;
+	isPrivate: Status;
 };
 
 export type Meta = {
@@ -63,8 +65,41 @@ export type Meta = {
 	};
 };
 
+export type ApplyType = "download" | "decrypt";
+
+export type ApplyResult = {};
+
+export type Application = {
+	id: number;
+	// 是否完成
+	done: Status;
+	// true 申请通过，false 申请失败
+	code?: Status;
+
+	// 当申请成功时，设置过期时间
+	expire?: number;
+
+	// 申请人 id
+	applicantId: Email;
+	// 处理人 id
+	transactorId: Email;
+	// 申请的证据的 id
+	evidenceId: number;
+
+	// 申请的资源类型
+	type: ApplyType;
+	// 当type为decrypt时指向哪一字段
+	prop?: keyof EvidenceFieldEncryptionMap;
+
+	// 创建时间
+	createTime: number;
+	// 结束时间
+	endTime?: number;
+};
+
 export type Ledger = {
 	meta: Meta;
 	users: Users;
 	evidences: Evidence[];
+	applications: Application[];
 };

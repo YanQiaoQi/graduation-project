@@ -1,45 +1,23 @@
 import { URL } from '@/common/constant';
 import request from '@/common/request';
-import { ApplyItem, LedgerItem, Certificate, Result } from '@/common/type';
+import {
+    ApplyItem,
+    Certificate,
+    Result,
+    EvidenceFieldEncryptionMap,
+    Evidence,
+} from '@/common/type';
 import { MessageWrapper } from '@/common/utils';
 
-export type DownloadArgus = {
-    email: string;
-    created: number;
-    password: string;
-};
-
-export async function download({ email, created, password }: DownloadArgus) {
-    return request.post(
-        `${URL.CERTIFICATE}/download/${encodeURIComponent(email)}/${created}`,
-        {
-            responseType: 'blob',
-            data: {
-                password,
-            },
-        },
+export async function applyForDownload(id: number) {
+    return MessageWrapper(
+        request.post(`${URL.CERTIFICATE}/share/apply/download/${id}`),
     );
 }
 
-export async function getAllCertificates() {
-    return request.get<Result<LedgerItem[]>>(`${URL.CERTIFICATE}/all`);
-}
-
-export async function applyForDownload(email: string, index: number) {
+export async function applyForDecrypt(id: number, field: keyof Evidence) {
     return MessageWrapper(
-        request.post(
-            `${URL.CERTIFICATE}/share/apply/download/${encodeURIComponent(
-                email,
-            )}/${index}`,
-        ),
-    );
-}
-
-export async function applyForDecrypt(email: string, index: number) {
-    return MessageWrapper(
-        request.post(
-            `${URL.CERTIFICATE}/share/apply/decrypt/${email}/${index}`,
-        ),
+        request.post(`${URL.CERTIFICATE}/share/apply/decrypt/${id}/${field}`),
     );
 }
 
@@ -77,7 +55,7 @@ export async function processApplication(index: number, data: ProcessReqBody) {
 }
 
 export async function getAuthorizedApplication() {
-    return request.get<Result<LedgerItem[]>>(
+    return request.get<Result<any[]>>(
         `${URL.CERTIFICATE}/share/authorizedApplications`,
     );
 }

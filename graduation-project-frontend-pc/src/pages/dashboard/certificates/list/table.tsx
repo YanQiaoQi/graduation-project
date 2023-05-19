@@ -12,8 +12,10 @@ import {
 import FormModal from '../../../../components/FormModal';
 import Table from '../../components/CertificateTable/index';
 import {
+    decryptEvidence,
     deleteEvidence,
     downloadEvidence,
+    encryptEvidence,
     updateEvidence,
 } from '@/service/evidence';
 
@@ -77,13 +79,10 @@ function CertificateTable({
 
     const onEditOk = useCallback(() => {
         authModal().then((res) =>
-            request
-                .post(`${URL.CERTIFICATE}/encrypt`, {
-                    data: form.getFieldsValue(),
-                })
-                .then((res) => {
-                    setEditingKey('');
-                }),
+            encryptEvidence(form.getFieldsValue()).then(() => {
+                getData();
+                setEditingKey('');
+            }),
         );
     }, []);
 
@@ -91,44 +90,24 @@ function CertificateTable({
         setEditingKey('');
     }, []);
 
-    const onDecrypt = useCallback(
-        (encryption: Encryption, value: string) => () => {
-            const cipher = encodeURIComponent(value);
-            return authModal().then((res) => {
-                return request.post(
-                    `${URL.CERTIFICATE}/decrypt/${encryption}/${cipher}`,
-                    {
-                        data: res,
-                    },
-                );
-            });
-        },
-        [columnEncryption],
-    );
-
     const action = {
-        columnEncryption: (value: any, record: Evidence, index: number) => {
-            // 正在修改
-            if (record.name === editingKey) {
-                return (
-                    <Space size="middle">
-                        <Button type="link" size="small" onClick={onEditOk}>
-                            确认
-                        </Button>
-                        <Button type="link" size="small" onClick={onEditCancel}>
-                            取消
-                        </Button>
-                    </Space>
-                );
-            }
-            // 未修改
-            else {
-                return (
-                    <Button type="link" size="small" onClick={onEdit(record)}>
-                        修改
+        columnEncryption: (_: any, record: Evidence) => {
+            return record.name === editingKey ? (
+                // 正在修改
+                <Space size="middle">
+                    <Button type="link" size="small" onClick={onEditOk}>
+                        确认
                     </Button>
-                );
-            }
+                    <Button type="link" size="small" onClick={onEditCancel}>
+                        取消
+                    </Button>
+                </Space>
+            ) : (
+                // 未修改
+                <Button type="link" size="small" onClick={onEdit(record)}>
+                    修改
+                </Button>
+            );
         },
         data: (_: any, record: Evidence) => {
             // 数据展示行
@@ -136,6 +115,7 @@ function CertificateTable({
             return (
                 <Space size="middle">
                     <Button
+                        disabled={Boolean(record.isDelete)}
                         type="link"
                         size="small"
                         onClick={dowloadCertificate(id, `${name}.${extension}`)}
@@ -173,7 +153,6 @@ function CertificateTable({
                 editingKey={editingKey}
                 columnEncryption={columnEncryption}
                 data={data}
-                getClear={onDecrypt}
                 action={action}
             />
         </Form>

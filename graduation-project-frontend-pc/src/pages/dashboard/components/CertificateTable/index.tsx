@@ -1,5 +1,5 @@
 import { useMemo, ReactNode, useCallback } from 'react';
-import { Table } from 'antd';
+import { Form, Table } from 'antd';
 import { ENCRYPTION } from '@/common/constant';
 import {
     Evidence,
@@ -7,8 +7,9 @@ import {
     EvidenceFieldEncryptionMap,
 } from '@/common/type';
 import { format } from '@/common/utils';
-import EditableCell from './editableCell';
-import EncryptedCell from './encryptedCell';
+import FormModal from '@/components/FormModal';
+import { decryptEvidence } from '@/service/evidence';
+import Cell from './cell';
 
 export type RenderColumn<T = any> = (
     value: T,
@@ -21,14 +22,19 @@ export type Action<T = any> = {
     data?: RenderColumn<T>;
 };
 
+export type GetClearFunc = (
+    id: number,
+    field: keyof Evidence,
+) => () => Promise<any>;
+
 interface CertificateTableProps {
     editable?: boolean;
     editingKey?: string;
     loading?: boolean;
     columnEncryption?: EvidenceFieldEncryptionMap;
     data?: Evidence[];
-    getClear: (encryption: Encryption, value: string) => () => Promise<any>;
     action?: Action;
+    getClear?: GetClearFunc;
 }
 
 function CertificateTable({
@@ -38,33 +44,35 @@ function CertificateTable({
     columnEncryption,
     data,
     action,
-    getClear,
+    getClear: customGetClear,
 }: CertificateTableProps) {
+    const [modalForm] = Form.useForm();
+
+    const authModal = FormModal({ form: modalForm });
+
+    const onDecrypt = useCallback<GetClearFunc>(
+        (id, field) => async () => {
+            return authModal().then(() => decryptEvidence(id, field));
+        },
+        [columnEncryption],
+    );
+
+    const getClear = useMemo(
+        () => customGetClear ?? onDecrypt,
+        [onDecrypt, customGetClear],
+    );
+
     const renderContent =
         (dataIndex: keyof Evidence) =>
         (render: Function) =>
         (value: string, record: Evidence, index: number) => {
+            //@ts-ignore
             const encryption = (columnEncryption?.[dataIndex] ??
                 'clear') as Encryption;
-            const isEncrypted = encryption !== 'clear';
             // 列加密
             if (index === 0) {
                 return ENCRYPTION.VALUE_TO_LABEL[encryption];
-            }
-            // 已加密：显示密文
-            if (isEncrypted) {
-                return (
-                    <EncryptedCell
-                        timeout={5000}
-                        dataIndex={dataIndex}
-                        getClear={getClear(encryption, value)}
-                    >
-                        {value}
-                    </EncryptedCell>
-                );
-            }
-            // 未加密：显示格式化数据
-            else {
+            } else {
                 return render(value, record, index);
             }
         };
@@ -118,13 +126,19 @@ function CertificateTable({
             editable: editable,
         },
         {
+            title: '备注',
+            dataIndex: 'description',
+            key: 'description',
+            editable: editable,
+        },
+        {
             title: '私有',
             dataIndex: 'isPrivate',
             key: 'isPrivate',
             render: (value: 0 | 1, record: Evidence, index: number) => {
                 // 列加密
                 if (index === 0) {
-                    return ENCRYPTION.VALUE_TO_LABEL.clear;
+                    return;
                 }
                 return value ? '是' : '否';
             },
@@ -136,16 +150,10 @@ function CertificateTable({
             render: (value: 0 | 1, record: Evidence, index: number) => {
                 // 列加密
                 if (index === 0) {
-                    return ENCRYPTION.VALUE_TO_LABEL.clear;
+                    return;
                 }
                 return value ? '已删除' : '在线';
             },
-        },
-        {
-            title: '备注',
-            dataIndex: 'description',
-            key: 'description',
-            editable: editable,
         },
         {
             title: '操作',
@@ -157,6 +165,10 @@ function CertificateTable({
 
     const mergedColumns = columns?.map((col) => {
         const dataIndex = col.dataIndex as keyof Evidence;
+        //@ts-ignore
+        const encryption = (columnEncryption?.[dataIndex] ??
+            'clear') as Encryption;
+        const isEncrypted = encryption !== 'clear';
         return {
             render: renderContent(dataIndex)(format(dataIndex)),
             ...col,
@@ -166,7 +178,9 @@ function CertificateTable({
                 title: dataIndex,
                 index,
                 editable: col.editable,
+                isEncrypted,
                 editing: record.name === editingKey,
+                getClear: getClear(record.id, dataIndex),
             }),
         };
     });
@@ -187,14 +201,14 @@ function CertificateTable({
 
     return (
         <Table
-            rowKey={'id'}
+            rowKey={'createTime'}
             loading={loading}
             // @ts-ignore
             columns={mergedColumns}
             dataSource={mergedData}
             components={{
                 body: {
-                    cell: EditableCell,
+                    cell: Cell,
                 },
             }}
             pagination={{ pageSize }}

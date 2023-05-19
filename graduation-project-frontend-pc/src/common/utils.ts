@@ -84,6 +84,6 @@ export const MessageWrapper = async <T = any>(service: Promise<Result<T>>) => {
             duration: res.code ? 1 : 3,
             content: res.message,
         });
-        return Promise[res.code ? 'resolve' : 'reject'](res.data);
+        return Promise[res.code ? 'resolve' : 'reject'](res.data ?? res);
     });
 };

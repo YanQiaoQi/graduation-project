@@ -1,58 +1,54 @@
 import { useCallback, useMemo } from 'react';
-import { Button, Table as AntdTable, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { TableProps } from 'antd/es/table';
-import {
-    Certificate,
-    ColumnEncryption,
-    Encryption,
-    LedgerItem,
-} from '@/common/type';
-import Table, { Action } from '../../components/CertificateTable/index';
+import { Evidence } from '@/common/type';
 import { applyForDecrypt, applyForDownload } from '@/service/application';
 import ExpandedTable from '../../components/CertificateTable/expandedTable';
+import { Action, GetClearFunc } from '../../components/CertificateTable';
+import { getAllEvidencesResBody as Record } from '@/service/evidence';
 
-interface AllPageProps extends TableProps<LedgerItem> {
+interface AllPageProps extends TableProps<Record> {
     user?: string;
-    data?: LedgerItem[];
+    data?: Record[];
 }
 
 function ExpandedCertificatesTable({ user, data, loading }: AllPageProps) {
     const dataSource = useMemo(
-        () => data?.filter((item) => item.user !== user) ?? [],
+        () => data?.filter((item) => item.creator !== user) ?? [],
         [data],
     );
 
-    const onApplyForDecrypt = useCallback(
-        (record: LedgerItem) =>
-            (encryption: Encryption, value: string) =>
-            () => {
-                return applyForDecrypt(record.user, 0);
-            },
-        [],
-    );
-
-    const onApplyForDownload = useCallback(
-        (email: string, index: number) => () => {
-            applyForDownload(email, index);
+    const onApplyForDecrypt = useCallback<GetClearFunc>(
+        (id, field) => () => {
+            console.log(id, field);
+            return applyForDecrypt(id, field);
         },
         [],
     );
 
-    const action = (record: LedgerItem): Action => ({
-        data: (value, r, index) => {
+    const onApplyForDownload = useCallback(
+        (id: number) => () => {
+            console.log(id);
+            applyForDownload(id);
+        },
+        [],
+    );
+
+    const action: Action<Evidence> = {
+        data: (_, r) => {
             return (
                 <Tooltip title="申请下载该证据">
                     <Button
                         type="link"
                         size="small"
-                        onClick={onApplyForDownload(record.user, index - 1)}
+                        onClick={onApplyForDownload(r.id)}
                     >
                         申请
                     </Button>
                 </Tooltip>
             );
         },
-    });
+    };
 
     return (
         <ExpandedTable

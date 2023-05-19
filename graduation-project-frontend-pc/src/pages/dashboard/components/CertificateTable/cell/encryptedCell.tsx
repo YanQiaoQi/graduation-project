@@ -2,7 +2,7 @@ import { useState, useCallback, FC } from 'react';
 import { Button, Tooltip } from 'antd';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import Container from '@/components/Container';
-import { Certificate, Encryption, Evidence } from '@/common/type';
+import { Evidence } from '@/common/type';
 import { format } from '@/common/utils';
 
 interface EncryptedCellProps {
@@ -25,7 +25,7 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
     const [isDecrypted, setIsDecrypted] = useState(false);
 
     const mergedOnClick = useCallback(() => {
-        getClear().then(({ data }) => {
+        getClear().then((data) => {
             setIsDecrypted(true);
             setContent(format(dataIndex)(data));
             setTimeout(() => {
@@ -36,18 +36,22 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
     }, [getClear]);
 
     return (
-        <Container align="space-between">
-            <Tooltip title={isDecrypted ? content : children}>
-                {content}
-            </Tooltip>
-            <Button
-                size="small"
-                type="link"
-                icon={isDecrypted ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                disabled={isDecrypted}
-                onClick={mergedOnClick}
-            />
-        </Container>
+        <td>
+            <Container align="space-between">
+                <Tooltip title={isDecrypted ? content : children}>
+                    {content}
+                </Tooltip>
+                <Button
+                    size="small"
+                    type="link"
+                    icon={
+                        isDecrypted ? <EyeOutlined /> : <EyeInvisibleOutlined />
+                    }
+                    disabled={isDecrypted}
+                    onClick={mergedOnClick}
+                />
+            </Container>
+        </td>
     );
 };
 

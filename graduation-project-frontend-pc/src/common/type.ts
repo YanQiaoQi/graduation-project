@@ -73,12 +73,6 @@ export interface AuthCertificate extends Certificate {
     auth: AuthItem;
 }
 
-export type LedgerItem = {
-    user: Email;
-    columnEncryption: ColumnEncryption;
-    certificates: AuthCertificate[];
-};
-
 export type FabricRes<T = any> = {
     code: 1 | 0;
     message: string;
@@ -112,7 +106,16 @@ export type FieldEncryption = 'clear' | 'AES';
 
 export type EvidenceEncryption = 'clear' | 'AES';
 
-export type EvidenceFieldEncryptionMap = Record<string, FieldEncryption>;
+export type EvidenceFieldEncryptionMap = Record<
+    | 'name'
+    | 'description'
+    | 'type'
+    | 'size'
+    | 'encryption'
+    | 'createTime'
+    | 'extension',
+    FieldEncryption
+>;
 
 export type User = {
     password: string;

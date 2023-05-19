@@ -1,16 +1,17 @@
 import { useCallback, useMemo } from 'react';
 import { Table as AntdTable } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { Encryption, LedgerItem } from '@/common/type';
-import Table, { Action } from '../../components/CertificateTable/index';
+import Table, {
+    Action,
+    GetClearFunc,
+} from '../../components/CertificateTable/index';
+import { getAllEvidencesResBody as Record } from '@/service/evidence';
 
-interface AllPageProps extends TableProps<LedgerItem> {
+interface AllPageProps extends TableProps<Record> {
     user?: string;
-    data?: LedgerItem[];
-    getClear: (
-        record: LedgerItem,
-    ) => (encryption: Encryption, value: string) => () => Promise<any>;
-    action: (record: LedgerItem) => Action;
+    data?: Record[];
+    action: Action;
+    getClear?: GetClearFunc;
 }
 
 function ExpandedCertificatesTable({
@@ -19,15 +20,18 @@ function ExpandedCertificatesTable({
     action,
     getClear,
 }: AllPageProps) {
-    const columns = useMemo(() => [{ title: '用户', dataIndex: 'user' }], []);
+    const columns = useMemo(
+        () => [{ title: '用户', dataIndex: 'creator' }],
+        [],
+    );
 
-    const expandedRowRender = useCallback((record: LedgerItem) => {
+    const expandedRowRender = useCallback((record: Record) => {
         return (
             <Table
-                data={record.certificates}
-                columnEncryption={record.columnEncryption}
-                action={action(record)}
-                getClear={getClear(record)}
+                getClear={getClear}
+                data={record.evidences}
+                columnEncryption={record.fieldEncryption}
+                action={action}
             />
         );
     }, []);
@@ -35,7 +39,7 @@ function ExpandedCertificatesTable({
     return (
         <AntdTable
             loading={loading}
-            rowKey={'user'}
+            rowKey={'creator'}
             dataSource={data}
             columns={columns}
             expandable={{
