@@ -24,11 +24,13 @@ export type UserInfo = {
     created: number;
 };
 
-export type ApplyType = 'download' | 'decrypt';
+export type Status = 0 | 1;
+
+export type ApplyType = 'download' | keyof EvidenceFieldEncryptionMap;
 
 export type ApplyResult = {
     // true 申请通过，false 申请失败
-    code: 0 | 1;
+    code: Status;
     // 结束时间
     endTime: number;
     // 当申请成功时，设置过期时间
@@ -74,13 +76,13 @@ export interface AuthCertificate extends Certificate {
 }
 
 export type FabricRes<T = any> = {
-    code: 1 | 0;
+    code: Status;
     message: string;
     data?: T;
 };
 
 export type FabricResWithData<T = any> = {
-    code: 1 | 0;
+    code: Status;
     message: string;
     data: T;
 };
@@ -142,9 +144,38 @@ export type Evidence = {
     createTime: timeStamp | Cipher;
     updateTime: timeStamp;
     // 是否已经删除
-    isDelete?: 0 | 1;
+    isDelete?: Status;
     // 是否私有
-    isPrivate?: 0 | 1;
+    isPrivate?: Status;
+    access?: Record<Email, (keyof EvidenceFieldEncryptionMap | 'download')[]>;
+};
+
+export type Application = {
+    id: number;
+    // 是否完成
+    done: Status;
+    // true 申请通过，false 申请失败
+    code?: Status;
+
+    // 当申请成功时，设置过期时间
+    expire?: number;
+
+    // 申请人 id
+    applicantId: Email;
+    // 处理人 id
+    transactorId: Email;
+    // 申请的证据的 id
+    evidenceId: number;
+
+    // 申请的资源类型
+    type: ApplyType;
+    // 当type为decrypt时指向哪一字段
+    prop?: keyof EvidenceFieldEncryptionMap;
+
+    // 创建时间
+    createTime: number;
+    // 结束时间
+    endTime?: number;
 };
 
 export type Meta = {

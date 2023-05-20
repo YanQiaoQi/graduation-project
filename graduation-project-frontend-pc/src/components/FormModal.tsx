@@ -1,23 +1,13 @@
 import { Modal as AntdModal, Form } from 'antd';
 import FormItem from '@/components/FormItem';
-import { FormInstance } from 'antd/es/form/Form';
 import { ReactNode } from 'react';
 
-interface FormModalPrps {
-    form: FormInstance;
-    formChildren?: ReactNode;
-    title?: string;
-}
-
-function FormModal<T>({
-    form,
-    formChildren,
-    title = '请输入密码',
-}: FormModalPrps) {
+function FormModal<T>(FormItems?: ReactNode) {
+    const [form] = Form.useForm();
     return () =>
-        new Promise((resolve, reject) => {
+        new Promise<T>((resolve, reject) => {
             AntdModal.confirm({
-                title,
+                title: '请输入以下信息',
                 centered: true,
                 content: (
                     <Form
@@ -29,7 +19,7 @@ function FormModal<T>({
                         }}
                         style={{ marginTop: 12, marginBottom: -16 }}
                     >
-                        {formChildren ?? <FormItem.Input.Password />}
+                        {FormItems ?? <FormItem.Input.Password />}
                     </Form>
                 ),
                 onOk: async () => {

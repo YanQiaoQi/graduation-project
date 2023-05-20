@@ -57,15 +57,22 @@ export type Evidence = {
 	isDelete: Status;
 	// 是否私有
 	isPrivate: Status;
+	access?: Record<
+		Email,
+		(keyof EvidenceFieldEncryptionMap | "download")[]
+	>;
 };
 
 export type Meta = {
 	evidence: {
 		num: number;
 	};
+	application: {
+		num: number;
+	};
 };
 
-export type ApplyType = "download" | "decrypt";
+export type ApplyType = (keyof EvidenceFieldEncryptionMap | "download");
 
 export type ApplyResult = {};
 
@@ -88,8 +95,6 @@ export type Application = {
 
 	// 申请的资源类型
 	type: ApplyType;
-	// 当type为decrypt时指向哪一字段
-	prop?: keyof EvidenceFieldEncryptionMap;
 
 	// 创建时间
 	createTime: number;

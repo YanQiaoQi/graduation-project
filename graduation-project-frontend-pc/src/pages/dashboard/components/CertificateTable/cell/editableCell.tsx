@@ -3,6 +3,7 @@ import { ENCRYPTION_ITEMS_MAP } from '@/common/constant';
 import { Evidence } from '@/common/type';
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+    showColumnEncryption?: boolean;
     editing: boolean;
     dataIndex: keyof Evidence;
     title: any;
@@ -24,9 +25,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
     children,
     editable,
     getClear,
+    showColumnEncryption,
     ...restProps
 }) => {
-    const encryptionStyle = index === 0 ? { backgroundColor: '#fafafa' } : {};
+    const encryptionStyle =
+        index === 0 && showColumnEncryption
+            ? { backgroundColor: '#fafafa' }
+            : {};
 
     return (
         <td {...restProps} style={encryptionStyle}>

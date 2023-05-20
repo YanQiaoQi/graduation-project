@@ -7,6 +7,5 @@ export type User = {
 };
 
 export function useUser() {
-    const { data: user } = useRequest(isAuthorized);
-    return [user ?? { email: undefined }];
+    return useRequest(isAuthorized);
 }

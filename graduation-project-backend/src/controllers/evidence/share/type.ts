@@ -1,33 +1,26 @@
 import {
+	EvidenceFieldEncryptionMap,
 	ApplyType,
-	AuthCertificate,
-	Certificate,
-	ColumnEncryption,
-	Email,
-} from "../../../common/type";
+} from "../../../services/fabric-sdk/type";
 
 export namespace Apply {
 	export type ReqParams = {
 		type: ApplyType;
-		index: string;
-		target: string;
+		id: string;
 	};
 
 	export type ReqBody = {
-		prop?: keyof Certificate;
+		prop?: keyof EvidenceFieldEncryptionMap;
 	};
 }
 
 export namespace Process {
 	export type ReqParams = {
-		type: ApplyType;
-		index: number;
+		id: string;
 	};
 
 	export type ReqBody = {
-		code: 0 | 1;
+		code: "0" | "1";
 		expire?: number;
 	};
 }
-
-

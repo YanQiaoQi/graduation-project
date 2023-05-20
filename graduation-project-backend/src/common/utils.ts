@@ -246,3 +246,7 @@ export function getEvidenceFromReqBody(
 			: undefined,
 	} as Partial<Evidence>;
 }
+
+export function copy(data: any) {
+	return JSON.parse(JSON.stringify(data));
+}

@@ -12,6 +12,11 @@ interface AllPageProps extends TableProps<Record> {
 }
 
 function ExpandedCertificatesTable({ user, data, loading }: AllPageProps) {
+    const columns = useMemo(
+        () => [{ title: '用户', dataIndex: 'creator' }],
+        [],
+    );
+
     const dataSource = useMemo(
         () => data?.filter((item) => item.creator !== user) ?? [],
         [data],
@@ -32,7 +37,13 @@ function ExpandedCertificatesTable({ user, data, loading }: AllPageProps) {
     };
 
     return (
-        <ExpandedTable loading={loading} data={dataSource} action={action} />
+        <ExpandedTable
+            rowKey="creator"
+            columns={columns}
+            loading={loading}
+            dataSource={dataSource}
+            action={action}
+        />
     );
 }
 

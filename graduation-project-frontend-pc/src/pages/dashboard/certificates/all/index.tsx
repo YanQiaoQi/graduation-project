@@ -1,10 +1,8 @@
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import { Card, Space } from 'antd';
 import useRequest from '@ahooksjs/use-request';
 import { UserContext } from '@/common/contexts';
-import { getAuthorizedApplication } from '@/service/application';
-import Table from './allUsersTable';
-import AuthedTable from './authTable';
+import Table from './table';
 import { getAllEvidences } from '@/service/evidence';
 
 function AllPage() {
@@ -13,32 +11,32 @@ function AllPage() {
     const { data: allEvidences, loading: loading0 } =
         useRequest(getAllEvidences);
 
-    const { data: authorizedCertificates, loading: loading1 } = useRequest(
-        getAuthorizedApplication,
-    );
+    // const { data: authorizedCertificates, loading: loading1 } = useRequest(
+    //     getAuthorizedApplication,
+    // );
 
-    const isShow = useMemo(
-        () =>
-            authorizedCertificates?.data &&
-            authorizedCertificates?.data?.length !== 0,
-        [authorizedCertificates],
-    );
+    // const isShow = useMemo(
+    //     () =>
+    //         authorizedCertificates?.data &&
+    //         authorizedCertificates?.data?.length !== 0,
+    //     [authorizedCertificates],
+    // );
 
     return (
         <Space size={16} direction="vertical" style={{ width: '100%' }}>
-            {isShow && (
+            {/* {isShow && (
                 <Card title="授权证据">
                     <AuthedTable
                         loading={loading1}
                         data={authorizedCertificates?.data}
                     />
                 </Card>
-            )}
+            )} */}
             <Card title="证据库">
                 <Table
-                    user={email ?? ''}
+                    user={email}
                     loading={loading0}
-                    data={allEvidences}
+                    dataSource={allEvidences}
                 />
             </Card>
         </Space>

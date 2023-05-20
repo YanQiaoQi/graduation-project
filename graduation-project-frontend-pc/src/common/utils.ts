@@ -1,7 +1,13 @@
 import { message as AntdMessage } from 'antd';
 import dayjs from 'dayjs';
 import { CERTIFICATE } from './constant';
-import { Certificate, Evidence, EvidenceType, Result } from './type';
+import {
+    Application,
+    Certificate,
+    Evidence,
+    EvidenceType,
+    Result,
+} from './type';
 
 export function navigateTo(path: string) {
     location.pathname = path;
@@ -38,10 +44,16 @@ export function downloadFileByBlob(blob: Blob, filename: string) {
     window.URL.revokeObjectURL(blobURL);
 }
 
-function formatByte(size: number) {
+function formatTime(value: string | number) {
+    const res = dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
+    return res === 'Invalid Date' ? value : res;
+}
+
+function formatByte(value: number | string) {
     function pow1024(num: number) {
         return Math.pow(1024, num);
     }
+    const size = Number(value);
     if (!size) return '';
     if (size < pow1024(1)) return size + ' B';
     if (size < pow1024(2)) return (size / pow1024(1)).toFixed(2) + ' KB';
@@ -50,24 +62,23 @@ function formatByte(size: number) {
     return (size / pow1024(4)).toFixed(2) + ' TB';
 }
 
-export function format(type: keyof Evidence) {
-    switch (type) {
-        case 'createTime': {
-            return (value: string) => {
-                const res = dayjs(Number(value)).format('YYYY-MM-DD HH:mm:ss');
-                return res === 'Invalid Date' ? value : res;
-            };
+export function format(type: keyof Evidence | keyof Application) {
+    if (/.*Time/.test(type) || type === 'expire') {
+        return formatTime;
+    } else
+        switch (type) {
+            case 'type': {
+                return (value: string) =>
+                    // @ts-ignore
+                    CERTIFICATE.TYPE_TO_TEXT[value] ?? value;
+            }
+            case 'size': {
+                return formatByte;
+            }
+            default: {
+                return (value: any) => value;
+            }
         }
-        case 'type': {
-            return (value: EvidenceType) => CERTIFICATE.TYPE_TO_TEXT[value];
-        }
-        case 'size': {
-            return (value: string) => formatByte(parseInt(value));
-        }
-        default: {
-            return (value: any) => value;
-        }
-    }
 }
 
 export const MessageWrapper = async <T = any>(service: Promise<Result<T>>) => {

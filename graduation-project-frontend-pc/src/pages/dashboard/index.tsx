@@ -10,10 +10,11 @@ import styles from './index.less';
 const { Header, Content, Footer, Sider } = Layout;
 
 const ConsolePage: FC = ({ children }) => {
-    const [user] = useUser();
+    const { data: user } = useUser();
 
     const path = useMemo(
         () => location.pathname.substring(1).split(`/`),
+
         [location.pathname],
     );
 
@@ -36,7 +37,7 @@ const ConsolePage: FC = ({ children }) => {
     const prefixCls = useMemo(() => 'console-index', []);
 
     return (
-        <UserContext.Provider value={user}>
+        <UserContext.Provider value={user ?? { email: undefined }}>
             <Layout className={styles[`${prefixCls}-container`]}>
                 <Sider collapsible>
                     <div className={styles[`${prefixCls}-header-logo`]} />

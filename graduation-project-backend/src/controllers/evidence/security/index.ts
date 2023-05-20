@@ -27,8 +27,29 @@ securityRouter.get<
 	// @ts-ignore
 	const email = req.auth?.email;
 	const { id, field } = req.params;
+	const evidenceId = Number(id);
+	const evidence = fabric.getEvidence(evidenceId);
+	if (!evidence) {
+		res.send({
+			status: 200,
+			code: 0,
+			message: "错误",
+		});
+		return;
+	}
+	if (
+		evidence.creatorId !== email &&
+		!evidence.access?.[email]?.includes(field)
+	) {
+		res.send({
+			status: 200,
+			code: 0,
+			message: "您没有权限",
+		});
+		return;
+	}
 	const data = fabric.decryptEvidencesField(
-		Number(id),
+		evidenceId,
 		field,
 		email
 	);

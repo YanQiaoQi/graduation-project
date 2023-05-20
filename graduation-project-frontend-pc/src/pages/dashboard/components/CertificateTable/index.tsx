@@ -1,15 +1,20 @@
-import { useMemo, ReactNode, useCallback } from 'react';
-import { Form, Table } from 'antd';
+import { useMemo, ReactNode, useCallback, useState, useContext } from 'react';
+import { Form, Table, Space, Button, TableProps } from 'antd';
 import { ENCRYPTION } from '@/common/constant';
 import {
     Evidence,
     Encryption,
     EvidenceFieldEncryptionMap,
+    Email,
 } from '@/common/type';
 import { format } from '@/common/utils';
-import FormModal from '@/components/FormModal';
-import { decryptEvidence } from '@/service/evidence';
 import Cell from './cell';
+import { ColumnType } from 'antd/es/table';
+import FormModal from '@/components/FormModal';
+import { encryptEvidence } from '@/service/evidence';
+import { UserContext } from '@/common/contexts';
+
+type DataType = Evidence | EvidenceFieldEncryptionMap;
 
 export type RenderColumn<T = any> = (
     value: T,
@@ -24,66 +29,114 @@ export type Action<T = any> = {
 
 export type GetClearFunc = (
     id: number,
-    field: keyof Evidence,
+    field: keyof EvidenceFieldEncryptionMap,
 ) => () => Promise<any>;
 
-interface CertificateTableProps {
+export type ExcludeItem = keyof Evidence | 'action';
+
+interface CertificateTableProps extends TableProps<Evidence> {
+    apply?: boolean;
+    showColumnEncryption?: boolean;
     editable?: boolean;
-    editingKey?: string;
-    loading?: boolean;
     columnEncryption?: EvidenceFieldEncryptionMap;
-    data?: Evidence[];
+    dataSource?: Evidence[];
     action?: Action;
     getClear?: GetClearFunc;
+    getData?: any;
+    onEditOk?: any;
+    exclude?: ExcludeItem[];
+    access?: (keyof EvidenceFieldEncryptionMap | 'download')[];
 }
 
 function CertificateTable({
-    editingKey,
+    apply = false,
+    showColumnEncryption = true,
     editable = false,
-    loading,
     columnEncryption,
-    data,
+    dataSource,
     action,
-    getClear: customGetClear,
+    getClear,
+    getData,
+    exclude,
+    pagination,
+    access,
+    onEditOk: customOnEditOk,
+    rowKey,
+    components,
+    ...restProps
 }: CertificateTableProps) {
-    const [modalForm] = Form.useForm();
-
-    const authModal = FormModal({ form: modalForm });
-
-    const onDecrypt = useCallback<GetClearFunc>(
-        (id, field) => async () => {
-            return authModal().then(() => decryptEvidence(id, field));
+    const user = useContext(UserContext);
+    const [editingKey, setEditingKey] = useState<string>('');
+    const form = Form.useFormInstance();
+    const authModal = FormModal();
+    const onEdit = useCallback(
+        (key) => () => {
+            form.setFieldsValue(columnEncryption);
+            setEditingKey(key ?? '');
         },
-        [columnEncryption],
+        [columnEncryption, form],
     );
 
-    const getClear = useMemo(
-        () => customGetClear ?? onDecrypt,
-        [onDecrypt, customGetClear],
-    );
+    const onEditOk = useCallback(() => {
+        authModal().then(() =>
+            encryptEvidence(form.getFieldsValue()).then(() => {
+                getData();
+                setEditingKey('');
+            }),
+        );
+    }, [form]);
+
+    const onEditCancel = useCallback(() => {
+        setEditingKey('');
+    }, []);
 
     const renderContent =
-        (dataIndex: keyof Evidence) =>
-        (render: Function) =>
-        (value: string, record: Evidence, index: number) => {
-            //@ts-ignore
-            const encryption = (columnEncryption?.[dataIndex] ??
-                'clear') as Encryption;
+        (dataIndex: keyof DataType) =>
+        (value: string, record: DataType, index: number) => {
+            const encryption = columnEncryption?.[dataIndex] ?? 'clear';
             // 列加密
-            if (index === 0) {
+            if (index === 0 && columnEncryption && showColumnEncryption) {
                 return ENCRYPTION.VALUE_TO_LABEL[encryption];
             } else {
-                return render(value, record, index);
+                return format(dataIndex)(value);
             }
         };
 
-    const renderAction: RenderColumn = useCallback(
+    const renderAction: RenderColumn<DataType> = useCallback(
         (value, record, index) => {
-            const renderFunction: keyof Action =
-                index === 0 ? 'columnEncryption' : 'data';
-            return action?.[renderFunction]?.(value, record, index);
+            if (index !== 0 || !showColumnEncryption) {
+                return action?.data?.(value, record, index);
+            } else if (columnEncryption && showColumnEncryption) {
+                if (editable) {
+                    return record.name === editingKey ? (
+                        // 正在修改
+                        <Space size="middle">
+                            <Button type="link" size="small" onClick={onEditOk}>
+                                确认
+                            </Button>
+                            <Button
+                                type="link"
+                                size="small"
+                                onClick={onEditCancel}
+                            >
+                                取消
+                            </Button>
+                        </Space>
+                    ) : (
+                        // 未修改
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={onEdit(record.name)}
+                        >
+                            修改
+                        </Button>
+                    );
+                }
+            }
+            return;
         },
-        [action],
+        [action, editingKey, showColumnEncryption],
     );
 
     const pageSize = useMemo(() => 10, []);
@@ -135,7 +188,7 @@ function CertificateTable({
             title: '私有',
             dataIndex: 'isPrivate',
             key: 'isPrivate',
-            render: (value: 0 | 1, record: Evidence, index: number) => {
+            render: (value: 0 | 1, record: DataType, index: number) => {
                 // 列加密
                 if (index === 0) {
                     return;
@@ -147,7 +200,7 @@ function CertificateTable({
             title: '状态',
             dataIndex: 'isDelete',
             key: 'isDelete',
-            render: (value: 0 | 1, record: Evidence, index: number) => {
+            render: (value: 0 | 1, record: DataType, index: number) => {
                 // 列加密
                 if (index === 0) {
                     return;
@@ -163,47 +216,52 @@ function CertificateTable({
         },
     ];
 
-    const mergedColumns = columns?.map((col) => {
-        const dataIndex = col.dataIndex as keyof Evidence;
-        //@ts-ignore
-        const encryption = (columnEncryption?.[dataIndex] ??
-            'clear') as Encryption;
-        const isEncrypted = encryption !== 'clear';
-        return {
-            render: renderContent(dataIndex)(format(dataIndex)),
-            ...col,
-            onCell: (record: Evidence, index?: number) => ({
-                record,
-                dataIndex,
-                title: dataIndex,
-                index,
-                editable: col.editable,
-                isEncrypted,
-                editing: record.name === editingKey,
-                getClear: getClear(record.id, dataIndex),
-            }),
-        };
-    });
+    const mergedColumns = columns
+        .filter((col) => !exclude?.includes(col.key as ExcludeItem))
+        ?.map((col) => {
+            const dataIndex = col.dataIndex as keyof DataType;
+            const encryption = columnEncryption?.[dataIndex] ?? 'clear';
+            const creator = dataSource?.[0].creatorId;
+
+            const isEncrypted = encryption !== 'clear';
+            const hasAccess =
+                (access && access.includes(dataIndex)) ||
+                creator === user.email;
+            return {
+                render: renderContent(dataIndex),
+                ...col,
+                onCell: (record: Evidence, index?: number) => ({
+                    record,
+                    dataIndex,
+                    title: dataIndex,
+                    index,
+                    editable: col.editable,
+                    disabled: !hasAccess && !apply,
+                    isEncrypted,
+                    editing: record.name === editingKey,
+                    getClear: getClear?.(record.id, dataIndex),
+                    showColumnEncryption,
+                }),
+            };
+        });
 
     const mergedData = useMemo(() => {
-        if (!columnEncryption) return data;
-        const res: (Evidence | EvidenceFieldEncryptionMap)[] = [
-            columnEncryption,
-        ];
-        data?.forEach((item) => {
+        if (!showColumnEncryption || !columnEncryption || pagination)
+            return dataSource;
+        const res: DataType[] = [columnEncryption];
+        dataSource?.forEach((item) => {
             res.push(item);
             if (res.length % pageSize === 0) {
                 res.push(columnEncryption);
             }
         });
         return res;
-    }, [data, columnEncryption]);
+    }, [dataSource, columnEncryption, showColumnEncryption]);
 
     return (
         <Table
-            rowKey={'createTime'}
-            loading={loading}
-            // @ts-ignore
+            rowKey="createTime"
+            //@ts-ignore
             columns={mergedColumns}
             dataSource={mergedData}
             components={{
@@ -211,7 +269,8 @@ function CertificateTable({
                     cell: Cell,
                 },
             }}
-            pagination={{ pageSize }}
+            pagination={pagination ?? { pageSize }}
+            {...restProps}
         />
     );
 }

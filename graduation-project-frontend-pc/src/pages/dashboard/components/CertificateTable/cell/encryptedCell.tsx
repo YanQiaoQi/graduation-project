@@ -6,6 +6,7 @@ import { Evidence } from '@/common/type';
 import { format } from '@/common/utils';
 
 interface EncryptedCellProps {
+    disabled?: boolean;
     dataIndex: keyof Evidence;
     timeout?: number;
     children: string;
@@ -13,6 +14,7 @@ interface EncryptedCellProps {
 }
 
 const EncryptedCell: FC<EncryptedCellProps> = ({
+    disabled = false,
     dataIndex,
     timeout = 3000,
     children,
@@ -26,6 +28,7 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
 
     const mergedOnClick = useCallback(() => {
         getClear().then((data) => {
+            if (!data) return;
             setIsDecrypted(true);
             setContent(format(dataIndex)(data));
             setTimeout(() => {
@@ -47,7 +50,7 @@ const EncryptedCell: FC<EncryptedCellProps> = ({
                     icon={
                         isDecrypted ? <EyeOutlined /> : <EyeInvisibleOutlined />
                     }
-                    disabled={isDecrypted}
+                    disabled={isDecrypted || disabled}
                     onClick={mergedOnClick}
                 />
             </Container>

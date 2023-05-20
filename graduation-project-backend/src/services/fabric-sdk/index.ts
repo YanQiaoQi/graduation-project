@@ -28,6 +28,8 @@ import {
 	EvidenceEncryption,
 	EvidenceFieldEncryptionMap,
 	Application,
+	ApplyType,
+	Status,
 } from "./type";
 import {
 	cryptography,
@@ -485,6 +487,9 @@ class Fabric {
 				evidence: {
 					num: 0,
 				},
+				application: {
+					num: 0,
+				},
 			},
 			users: ledger.users ?? {},
 			evidences: ledger.evidences ?? [],
@@ -594,8 +599,10 @@ class Fabric {
 				}
 			}
 			console.log("更新账本", this.ledger);
+			return true;
 		} catch (error) {
 			console.log("updateRemoteLedger", error);
+			return false;
 		}
 	}
 
@@ -690,6 +697,24 @@ class Fabric {
 		}
 		await this.updateRemoteLedger(["evidences"]);
 	}
+	async addEvidenceAccess(
+		evidenceId: number,
+		userId: Email,
+		applyType: ApplyType
+	) {
+		const evidence = this.getEvidence(evidenceId);
+		if (!evidence) {
+			return;
+		}
+		if (!evidence.access) {
+			evidence.access = {};
+		}
+		if (!evidence.access[userId]) {
+			evidence.access[userId] = [applyType];
+		} else {
+			evidence.access[userId].push(applyType);
+		}
+	}
 	getEvidenceId() {
 		const id = this.ledger!.meta.evidence.num;
 		this.ledger!.meta.evidence.num++;
@@ -768,9 +793,100 @@ class Fabric {
 	}
 
 	// application
-	async createApplication(application: Application) {
+	getApplicationId() {
+		const id = this.ledger!.meta.application.num;
+		this.ledger!.meta.application.num++;
+		return id;
+	}
+	getApplication(id: number) {
+		return this.ledger?.applications.find(
+			(a) => a.id === id
+		);
+	}
+	shouldCreateApplication(
+		applicantId: Email,
+		evidenceId: number
+	) {
+		const applications =
+			fabric.getApplicantsApplications(applicantId);
+		if (
+			applications &&
+			applications.find((a) => {
+				const applyType = a.type;
+
+				const hasApply = a.evidenceId === evidenceId;
+				const notDone = a.done === 0;
+				const evidence = this.getEvidence(a.evidenceId);
+				const access =
+					evidence?.access?.[applicantId] ?? [];
+
+				const notExpire =
+					a.code === 1 && a.expire && a.expire > Date.now();
+				return (
+					hasApply &&
+					(!access.includes(applyType) || notDone)
+				);
+			})
+		) {
+			return false;
+		}
+		return true;
+	}
+	async createApplication(
+		applicantId: Email,
+		evidenceId: number,
+		type: ApplyType
+	) {
+		const evidence = this.getEvidence(evidenceId);
+		if (!evidence) {
+			return;
+		}
+		const application: Application = {
+			id: this.getApplicationId(),
+			done: 0,
+			applicantId,
+			transactorId: evidence?.creatorId,
+			type,
+			evidenceId,
+			createTime: Date.now(),
+		};
 		this.ledger?.applications.push(application);
-		await this.updateRemoteLedger(["applications"]);
+		await this.updateRemoteLedger(["applications", "meta"]);
+	}
+	getApplicantsApplications(userId: Email) {
+		return this.ledger?.applications.filter(
+			(a) => a.applicantId === userId
+		);
+	}
+	getTransactorsApplications(userId: Email) {
+		return this.ledger?.applications.filter(
+			(a) => a.transactorId === userId
+		);
+	}
+	async updateApplication(
+		applicationId: number,
+		code: Status,
+		expire?: number
+	) {
+		// 更新application
+		const application = this.getApplication(applicationId);
+		if (!application) return false;
+		application.done = 1;
+		application.endTime = Date.now();
+		application.code = code;
+		if (!code) return false;
+		application.expire = expire;
+
+		// 更新 evidence
+		this.addEvidenceAccess(
+			application.evidenceId,
+			application.applicantId,
+			application.type
+		);
+		return await this.updateRemoteLedger([
+			"applications",
+			"evidences",
+		]);
 	}
 }
 

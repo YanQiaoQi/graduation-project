@@ -1,134 +1,104 @@
 import { Router } from "express";
-import { Request } from "express-jwt";
 import { Apply, Process } from "./type";
 import { Result } from "../../../common/type";
 import { Res } from "../../../common/res";
 import fabric from "../../../services/fabric-sdk";
-const certificateShareRouter = Router();
-
-// 获取申请队列
-// certificateShareRouter.get(
-// 	"/application",
-// 	async (req: Request, res) => {
-// 		const email = req.auth?.email;
-// 		const { data: user } = await FabricSDK.get(email);
-// 		const { myApplications, othersApplications } = user;
-// 		res.send({
-// 			status: 200,
-// 			code: 1,
-// 			data: {
-// 				myApplications,
-// 				othersApplications,
-// 			},
-// 		});
-// 	}
-// );
+import { Request } from "express-jwt";
+import { Status } from "../../../services/fabric-sdk/type";
+const shareRouter = Router();
 
 // 获取我的申请队列
-// certificateShareRouter.get(
-// 	"/myApplications",
-// 	async (req: Request, res) => {
-// 		const email = req.auth?.email;
-// 		const ledger = await FabricSDK.getLedger();
-// 		const data = ledger[email].myApplications.map(
-// 			(application) => {
-// 				const { target, index } = application;
-// 				const targetUser = ledger[target];
-// 				const certificate = targetUser.certificates[index];
-// 				return {
-// 					...application,
-// 					certificate,
-// 				};
-// 			}
-// 		);
-// 		res.send({
-// 			status: 200,
-// 			code: 1,
-// 			data,
-// 		});
-// 	}
-// );
+shareRouter.get(
+	"/applications/applicant",
+	async (req: Request, res) => {
+		const email = req.auth?.email;
+		const applications =
+			fabric.getApplicantsApplications(email);
+		const data = applications?.map((a) => {
+			const { evidenceId } = a;
+			const evidence = fabric.getEvidence(evidenceId);
+			const transactor = fabric.getUser(a.transactorId);
+			return {
+				...a,
+				evidences: [evidence],
+				access: evidence?.access?.[email],
+				fieldEncryption:
+					transactor?.evidenceFieldEncryptionMap,
+			};
+		});
+		res.send({
+			status: 200,
+			code: 1,
+			data,
+		});
+	}
+);
 
-// 获取他人申请队列
-// certificateShareRouter.get(
-// 	"/othersApplications",
-// 	async (req: Request, res) => {
-// 		const email = req.auth?.email;
-// 		const { data: user } = await FabricSDK.get(email);
-// 		const certificates = user.certificates;
-// 		const data = user.othersApplications.map(
-// 			(application) => {
-// 				const { index } = application;
-// 				const certificate = certificates[index];
-// 				return {
-// 					...application,
-// 					certificate,
-// 				};
-// 			}
-// 		);
-// 		// .filter((application) => application.done === false);
-// 		res.send({
-// 			status: 200,
-// 			code: 1,
-// 			data,
-// 		});
-// 	}
-// );
+//获取他人申请队列;
+shareRouter.get(
+	"/applications/transactor",
+	async (req: Request, res) => {
+		const email = req.auth?.email;
+		const applications =
+			fabric.getTransactorsApplications(email);
+		const data = applications?.map((a) => {
+			const { evidenceId } = a;
+			const evidence = fabric.getEvidence(evidenceId);
+			const transactor = fabric.getUser(a.transactorId);
+			return {
+				...a,
+				evidences: [evidence],
+				access: evidence?.access?.[email],
+				fieldEncryption:
+					transactor?.evidenceFieldEncryptionMap,
+			};
+		});
+		res.send({
+			status: 200,
+			code: 1,
+			data,
+		});
+	}
+);
 
-// 获取我已经授权的certificate
-// certificateShareRouter.get(
-// 	"/authorizedApplications",
-// 	async (req: Request, res) => {
-// 		const email = req.auth?.email;
-// 		const ledger = await FabricSDK.getLedger();
-// 		const user = ledger[email];
-// 		console.log(user.authorizedCertificates);
-// 		const data: LedgerItem[] = [];
-// 		for (let email in user.authorizedCertificates) {
-// 			const targetUser = ledger[email];
-// 			const ledgerItem: LedgerItem = {
-// 				user: email,
-// 				columnEncryption: targetUser.columnEncryption,
-// 				certificates: [],
-// 			};
-// 			const authCertificates =
-// 				user.authorizedCertificates[email];
-// 			authCertificates.forEach(({ created, auth }) => {
-// 				const targetCertificate =
-// 					targetUser.certificates.find(
-// 						(certificate) => certificate.created === created
-// 					);
-// 				if (!targetCertificate) return;
-// 				const AuthCertificate: AuthCertificate = {
-// 					...targetCertificate,
-// 					auth,
-// 				};
-// 				ledgerItem.certificates.push(AuthCertificate);
-// 			});
-// 			data.push(ledgerItem);
-// 		}
-// 		res.send({
-// 			status: 200,
-// 			code: 1,
-// 			data,
-// 		});
-// 	}
-// );
+shareRouter.post<Apply.ReqParams, Result>(
+	"/apply/:type/:id",
+	async (req, res) => {
+		// @ts-ignore
+		const email = req.auth?.email;
+		const { type, id } = req.params;
+		const evidenceId = Number(id);
+		if (
+			!fabric.shouldCreateApplication(email, evidenceId)
+		) {
+			res.send(
+				Res.fail("已申请，但未批准 或 申请通过，资源未过期")
+			);
+			return;
+		}
+		await fabric.createApplication(email, evidenceId, type);
+		res.send(Res.success("申请成功"));
+	}
+);
 
-certificateShareRouter.post<
-	Apply.ReqParams,
-	Result,
-	Apply.ReqBody
->("/apply/:type/:target/:index", async (req, res) => {
-	res.send(Res.success("申请成功"));
-});
-
-certificateShareRouter.post<
+// 处理申请
+shareRouter.post<
 	Process.ReqParams,
 	Result,
 	Process.ReqBody
->("/process/:index", async (req, res) => {
-	// @ts-ignore
+>("/process/:id", async (req, res) => {
+	const id = Number(req.params.id);
+	const { code, expire } = req.body;
+	await fabric.updateApplication(
+		id,
+		Number(code) as Status,
+		Number(expire)
+	);
+	res.send({
+		status: 200,
+		code: 1,
+		message: "处理成功",
+	});
 });
 
-export default certificateShareRouter;
+export default shareRouter;

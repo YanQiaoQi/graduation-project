@@ -5,8 +5,7 @@ import { getEvidences } from '@/service/evidence';
 
 const CertificatesListPage: React.FC = () => {
     const { data, loading, run } = useRequest(getEvidences);
-    console.log(data);
-    
+
     return (
         <Card
             title="证据列表"
@@ -17,7 +16,7 @@ const CertificatesListPage: React.FC = () => {
             <Table
                 loading={loading}
                 columnEncryption={data?.fieldEncryption}
-                data={data?.evidences}
+                dataSource={data?.evidences}
                 getData={run}
             />
         </Card>

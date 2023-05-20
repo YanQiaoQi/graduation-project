@@ -1,11 +1,11 @@
 import { URL } from '@/common/constant';
 import request from '@/common/request';
 import {
-    ApplyItem,
-    Certificate,
+    ApplyType,
     Result,
     EvidenceFieldEncryptionMap,
     Evidence,
+    Application,
 } from '@/common/type';
 import { MessageWrapper } from '@/common/utils';
 
@@ -15,9 +15,12 @@ export async function applyForDownload(id: number) {
     );
 }
 
-export async function applyForDecrypt(id: number, field: keyof Evidence) {
+export async function applyForDecrypt(
+    id: number,
+    field: keyof EvidenceFieldEncryptionMap,
+) {
     return MessageWrapper(
-        request.post(`${URL.CERTIFICATE}/share/apply/decrypt/${id}/${field}`),
+        request.post(`${URL.CERTIFICATE}/share/apply/${field}/${id}`),
     );
 }
 
@@ -25,20 +28,26 @@ export async function getApplications() {
     return request.get(`${URL.CERTIFICATE}/share/application`);
 }
 
-interface MyApplication extends ApplyItem {
-    certificate: Certificate;
+export interface ApplicationResBody extends Application {
+    evidences: Evidence[];
+    fieldEncryption: EvidenceFieldEncryptionMap;
+    access: ApplyType[];
 }
 
-export async function getMyApplications() {
-    return request.get<Result<MyApplication[]>>(
-        `${URL.CERTIFICATE}/share/myApplications`,
-    );
+export async function getApplicantsApplications() {
+    return request
+        .get<Result<ApplicationResBody[]>>(
+            `${URL.CERTIFICATE}/share/applications/applicant`,
+        )
+        .then((res) => res.data);
 }
 
-export async function getOthersApplications() {
-    return request.get<Result<MyApplication[]>>(
-        `${URL.CERTIFICATE}/share/othersApplications`,
-    );
+export async function getTransactorsApplications() {
+    return request
+        .get<Result<ApplicationResBody[]>>(
+            `${URL.CERTIFICATE}/share/applications/transactor`,
+        )
+        .then((res) => res.data);
 }
 
 type ProcessReqBody = {
@@ -46,9 +55,9 @@ type ProcessReqBody = {
     expire?: number;
 };
 
-export async function processApplication(index: number, data: ProcessReqBody) {
+export async function processApplication(id: number, data: ProcessReqBody) {
     return MessageWrapper(
-        request.post(`${URL.CERTIFICATE}/share/process/${index}`, {
+        request.post(`${URL.CERTIFICATE}/share/process/${id}`, {
             data,
         }),
     );

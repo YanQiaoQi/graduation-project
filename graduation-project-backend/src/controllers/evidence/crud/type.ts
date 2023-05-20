@@ -1,4 +1,5 @@
 import {
+	Evidence,
 	EvidenceEncryption,
 	EvidenceType,
 } from "../../../services/fabric-sdk/type";
@@ -19,4 +20,7 @@ export namespace DeleteCertificate {
 	export type ReqParams = {
 		id: string;
 	};
+	export type ReqBody = Partial<
+		Record<Exclude<keyof Evidence, "id">, string>
+	>;
 }

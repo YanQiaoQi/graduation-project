@@ -4,19 +4,14 @@ import path from "path";
 import { DeleteCertificate, NewCertificate } from "./type";
 import { Res } from "../../../common/res";
 import {
-	writeEncryptedFile,
-	splitFileName,
 	cryptography,
-	writeEncryptedFiles,
 	getEvidenceFromReqBody,
+	copy,
 } from "../../../common/utils";
 import { Result } from "../../../common/type";
 import fabric from "../../../services/fabric-sdk";
 import upload from "../../../middlewares/multer";
-import {
-	Evidence,
-	Status,
-} from "../../../services/fabric-sdk/type";
+import { Evidence } from "../../../services/fabric-sdk/type";
 
 const crudRouter = Router();
 
@@ -58,7 +53,7 @@ crudRouter.delete<DeleteCertificate.ReqParams, Result>(
 crudRouter.put<
 	DeleteCertificate.ReqParams,
 	Result,
-	Partial<Record<Exclude<keyof Evidence, "id">, string>>
+	DeleteCertificate.ReqBody
 >("/:id", async (req, res) => {
 	await fabric.updateEvidence(
 		parseInt(req.params.id),
@@ -88,27 +83,35 @@ crudRouter.get<never, Result>(
 	}
 );
 
-crudRouter.get<never, Result>("/all", async (req, res) => {
-	const data = fabric.getAllEvidences();
-	res.send({
-		status: 200,
-		code: 1,
-		data,
-	});
-});
+crudRouter.get<never, Result>(
+	"/all",
+	async (req: Request, res) => {
+		const data = fabric.getAllEvidences();
+		res.send({
+			status: 200,
+			code: 1,
+			data,
+		});
+	}
+);
 
 crudRouter.get(
 	"/download/:id",
 	async function downloadCertificate(req, res) {
 		// @ts-ignore
-		const applicantEmail = req.auth?.email;
+		const applicantId = req.auth?.email;
 		const { id } = req.params;
-		const evidence = fabric.getEvidence(Number(id));
+		const evidence: Evidence = copy(
+			fabric.getEvidence(Number(id))
+		);
 		if (!evidence) {
 			throw new Error("未找到证据");
 		}
 		// 鉴权
-		if (false) {
+		if (
+			evidence.creatorId !== applicantId &&
+			!evidence.access?.[applicantId]?.includes("download")
+		) {
 			throw new Error("鉴权失败");
 		}
 		const creator = fabric.getUser(evidence.creatorId);
@@ -129,51 +132,5 @@ crudRouter.get(
 		res.send(data);
 	}
 );
-
-// crudRouter.post(
-// 	"/download/:email/:created",
-// 	async function downloadCertificate(req, res) {
-// 		// @ts-ignore
-// 		const email = req.auth?.email;
-// 		const { email: targetEmail } = req.params;
-// 		let created: string | number = parseInt(
-// 			req.params.created
-// 		);
-// 		if (isNaN(created)) {
-// 			created = req.params.created;
-// 		}
-// 		const ledger = await FabricSDK.getLedger();
-// 		const targetUser = ledger[targetEmail];
-// 		const originUser = ledger[email];
-// 		const isAuthed = originUser.authorizedCertificates[
-// 			targetEmail
-// 		]?.find(
-// 			(certificate) => certificate.created === created
-// 		);
-// 		if (email !== targetEmail && !isAuthed) {
-// 			throw new Error("不具有权限");
-// 		}
-// 		const certificate: Certificate =
-// 			targetUser.evidences.find(
-// 				(certificate) => certificate.created === created
-// 			)!;
-// 		if (!certificate) {
-// 			throw new Error("未找到证据");
-// 		}
-// 		cryptography.decrypt.certificate(
-// 			certificate,
-// 			targetUser.columnEncryption
-// 		);
-// 		const { name, extension, encryption } = certificate;
-// 		const absolutePath = path.resolve(
-// 			`upload/${targetEmail}-${certificate.created}-${name}.${extension}`
-// 		);
-// 		const data = await cryptography.decrypt.file(
-// 			encryption,
-// 			absolutePath
-// 		);
-// 		res.send(data);
-// 	}
-// );
 
 export default crudRouter;
