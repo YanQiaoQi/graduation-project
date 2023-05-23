@@ -1,0 +1,72 @@
+<mxfile host="app.diagrams.net" modified="2023-05-23T04:04:00.029Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="Tlf5fqYuXyaouGJ9DLeQ" version="21.3.2" type="device">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="890" dy="373" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="lQzMKsJTND3-giCzSCY7-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-1" target="lQzMKsJTND3-giCzSCY7-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-1" value="开始" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="422.75" y="70" width="115" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-2" target="lQzMKsJTND3-giCzSCY7-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-2" value="前端发送邮箱给后端" style="whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="160" width="179.5" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-4" target="lQzMKsJTND3-giCzSCY7-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-4" value="后端向向邮箱发送六位验证码" style="whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="240" width="179.5" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-6" target="lQzMKsJTND3-giCzSCY7-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-6" value="前端发送邮箱，验证码，密码" style="whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="320" width="179.5" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-10" target="lQzMKsJTND3-giCzSCY7-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-10" value="后端向区块链查询user信息" style="whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="400" width="179.5" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-12" target="lQzMKsJTND3-giCzSCY7-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="630" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="340" y="510" />
+              <mxPoint x="340" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-12" value="该邮箱未被注册" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="480" width="179.5" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="lQzMKsJTND3-giCzSCY7-14" target="lQzMKsJTND3-giCzSCY7-21">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="501" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-14" value="生成token返回前端存储" style="whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="390.5" y="570" width="179.5" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-21" value="结束" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="420.13" y="670" width="120.25" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-22" value="Y" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="480" y="540" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lQzMKsJTND3-giCzSCY7-27" value="N" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="340" y="540" width="30" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
