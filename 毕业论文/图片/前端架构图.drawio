@@ -1,0 +1,121 @@
+<mxfile host="app.diagrams.net" modified="2023-05-28T11:21:14.663Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="2N0p5-FUN_D1fLqQbGrq" version="21.3.4" type="device">
+  <diagram name="第 1 页" id="bQBjTKNPLwI1pIJ4iwUc">
+    <mxGraphModel dx="1235" dy="636" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="PuG5a18Pb_pLku9txUYX-26" value="界面层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="135" y="120" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-37" value="" style="group;fontSize=14;fontFamily=宋体;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="270" y="70" width="1126" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-49" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="-20.625" y="-15" width="1010.625" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-27" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry width="360.9375" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-28" value="用户" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-29" value="注册界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="14.4375" y="35" width="99" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-30" value="登录界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="134.0625" y="35" width="92.8125" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-31" value="修改密码界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="247.5" y="35" width="103.125" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-38" value="" style="group;fontSize=14;fontFamily=宋体;" vertex="1" connectable="0" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="650" y="2.5" width="476" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-39" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-38">
+          <mxGeometry width="320" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-40" value="证据共享" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-38">
+          <mxGeometry x="-5" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-41" value="证据库界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-38">
+          <mxGeometry x="10" y="35" width="94" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-42" value="我的申请界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-38">
+          <mxGeometry x="120" y="35" width="90" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-43" value="让人申请界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-38">
+          <mxGeometry x="220" y="35" width="90" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-44" value="" style="group;fontSize=14;fontFamily=宋体;" vertex="1" connectable="0" parent="PuG5a18Pb_pLku9txUYX-37">
+          <mxGeometry x="390" y="-0.45000000000000284" width="326" height="130.45" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-32" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-44">
+          <mxGeometry y="0.45" width="230" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-33" value="证据管理" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-44">
+          <mxGeometry x="-10" y="-0.45" width="100" height="35.45454545454545" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-45" value="证据创建界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-44">
+          <mxGeometry x="10" y="35.45" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-46" value="证据创建界面" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="PuG5a18Pb_pLku9txUYX-44">
+          <mxGeometry x="120" y="35" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-48" value="公共组件层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="120" y="295" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-51" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="250" y="260" width="1010" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-52" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="270" y="280" width="360" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-53" value="" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="650" y="280" width="480" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-71" value="Form" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="275" y="280" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-72" value="EvidenceTable" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="645" y="280" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-73" value="邮箱输入" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="286" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-74" value="密码输入" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="400" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-75" value="密码确认输入" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="516" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-76" value="常规证据表格" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="780" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-77" value="可修改单元格" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-78" value="加密单元格" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="900" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-79" value="用户表格嵌套常规证据表格" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="664" y="310" width="96" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-80" value="界面结构组件" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="280" width="96" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-81" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;axios&lt;/font&gt;" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="250" y="450" width="1010" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-83" value="网络请求层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="120" y="480" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-87" value="浏览器原生层" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="115" y="605" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PuG5a18Pb_pLku9txUYX-88" value="浏览器原生层" style="whiteSpace=wrap;html=1;fontSize=14;fontFamily=宋体;" vertex="1" parent="1">
+          <mxGeometry x="250" y="575" width="1010" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

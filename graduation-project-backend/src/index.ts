@@ -17,6 +17,6 @@ app.listen(port, () => {
 });
 
 app.use(error());
-setTimeout(() => {
-	fabric.createUser("1981405879@qq.com", "nbawwe_0425");
-},5000);
+// setTimeout(() => {
+// 	fabric.createUser("1981405879@qq.com", "nbawwe_0425");
+// },5000);

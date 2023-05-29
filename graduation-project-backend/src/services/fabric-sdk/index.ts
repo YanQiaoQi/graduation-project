@@ -608,7 +608,8 @@ class Fabric {
 
 	// users
 	async createUser(userId: Email, password: string) {
-		if (this.ledger!.users[userId]) return;
+		if (this.ledger?.users[userId]) return;
+		if (this.ledger?.users) this.ledger.users = {};
 		this.ledger!.users[userId] = {
 			password,
 			createTime: Date.now(),
