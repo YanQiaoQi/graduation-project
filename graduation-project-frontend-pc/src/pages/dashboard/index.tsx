@@ -40,7 +40,7 @@ const ConsolePage: FC = ({ children }) => {
         <UserContext.Provider value={user ?? { email: undefined }}>
             <Layout className={styles[`${prefixCls}-container`]}>
                 <Sider collapsible>
-                    <div className={styles[`${prefixCls}-header-logo`]} />
+                    <div className={styles[`${prefixCls}-header-logo`]} >存证系统</div>
                     <Menu
                         theme="dark"
                         mode="inline"

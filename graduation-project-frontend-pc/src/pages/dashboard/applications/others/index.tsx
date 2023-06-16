@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Card, Space, Button, DatePicker } from 'antd';
+import { Card, Space, Button, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import {
     getTransactorsApplications,
@@ -23,6 +23,10 @@ function OthersApplications() {
 
     const onConfirm = (id: number) => () => {
         ConfirmModal().then(({ expire }) => {
+            if (expire < Date.now()) {
+                message.error('过期时间小于现在时间');
+                return;
+            }
             processApplication(id, {
                 code: 1,
                 expire: dayjs(expire).valueOf(),

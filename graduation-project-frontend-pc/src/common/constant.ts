@@ -27,28 +27,24 @@ export const CERTIFICATE = {
         AUDIO: 'audio',
         DOCUMENT: 'document',
         IMAGE: 'image',
-        WEBPAGE: 'webpage',
     },
     TYPE_TO_TEXT: {
         video: '视频',
         audio: '音频',
         document: '文档',
         image: '图片',
-        webpage: '网页',
     },
     TYPE_TO_ACCEPT: {
         video: 'video/*',
         audio: 'audio/*',
         document: '',
         image: 'image/*',
-        webpage: '',
     },
     TYPE_TO_MAX_SIZE: {
         video: 200 * 1024 * 1024,
         audio: 200 * 1024 * 1024,
         document: 50 * 1024 * 1024,
         image: 50 * 1024 * 1024,
-        webpage: '',
     },
     ITEMS: [
         {
@@ -67,21 +63,64 @@ export const CERTIFICATE = {
             label: '图片',
             value: 'image',
         },
-        {
-            label: '网页',
-            value: 'webpage',
-        },
     ],
 };
 
 export const ENCRYPTION_ITEMS_MAP = {
-    video: [],
-    audio: [],
-    document: [],
-    image: [
+    video: [
+        {
+            label: '明文',
+            value: 'clear',
+        },
         {
             label: 'AES',
             value: 'AES',
+        },
+        {
+            label: 'RSA',
+            value: 'RSA',
+        },
+    ],
+    audio: [
+        {
+            label: '明文',
+            value: 'clear',
+        },
+        {
+            label: 'AES',
+            value: 'AES',
+        },
+        {
+            label: 'RSA',
+            value: 'RSA',
+        },
+    ],
+    document: [
+        {
+            label: '明文',
+            value: 'clear',
+        },
+        {
+            label: 'AES',
+            value: 'AES',
+        },
+        {
+            label: 'RSA',
+            value: 'RSA',
+        },
+    ],
+    image: [
+        {
+            label: '明文',
+            value: 'clear',
+        },
+        {
+            label: 'AES',
+            value: 'AES',
+        },
+        {
+            label: 'RSA',
+            value: 'RSA',
         },
     ],
     text: [
@@ -92,6 +131,10 @@ export const ENCRYPTION_ITEMS_MAP = {
         {
             label: 'AES',
             value: 'AES',
+        },
+        {
+            label: 'RSA',
+            value: 'RSA',
         },
     ],
 };
@@ -107,6 +150,7 @@ export const ENCRYPTION: a = {
     VALUE_TO_LABEL: {
         clear: '明文',
         AES: 'AES',
+        RSA: 'RSA',
     },
     ITEMS_MAP: ENCRYPTION_ITEMS_MAP,
 };

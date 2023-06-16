@@ -9,6 +9,7 @@ import { signup } from '@/service/user';
 function SignupPage() {
     const onFinish = useCallback((values: any) => {
         MessageWrapper(signup(values))
+        //@ts-ignore
             .then(({ token }) => {
                 localStorage.setItem(`token`, token!);
                 navigateTo('/auth/login');

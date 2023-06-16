@@ -7,6 +7,7 @@ import {
     Evidence,
     EvidenceType,
     Result,
+    Status,
 } from './type';
 
 export function navigateTo(path: string) {
@@ -62,8 +63,16 @@ function formatByte(value: number | string) {
     return (size / pow1024(4)).toFixed(2) + ' TB';
 }
 
-export function format(type: keyof Evidence | keyof Application) {
-    if (/.*Time/.test(type) || type === 'expire') {
+function formatSex(value?: Status) {
+    return value !== null && value !== undefined
+        ? value === 1
+            ? '男'
+            : '女'
+        : undefined;
+}
+
+export function format(type: string): (value: any) => any {
+    if (/.*Time/.test(type) || type === 'expire' || type?.includes('time')) {
         return formatTime;
     } else
         switch (type) {
@@ -74,6 +83,9 @@ export function format(type: keyof Evidence | keyof Application) {
             }
             case 'size': {
                 return formatByte;
+            }
+            case 'sex': {
+                return formatSex;
             }
             default: {
                 return (value: any) => value;

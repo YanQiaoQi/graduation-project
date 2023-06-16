@@ -1,14 +1,14 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
-const myEmail = "3347048784@qq.com";
+const myEmail = "auhnipuiq@163.com";
 
 const config = {
-	service: "qq",
+	host: "smtp.163.com",
 	secure: true,
 	port: 465,
 	auth: {
 		user: myEmail,
-		pass: "fxfmchsledeudaae",
+		pass: "MMDBNNLHOEHNIOVS",
 	},
 };
 
@@ -18,6 +18,8 @@ class Email {
 		this.mailer = nodemailer.createTransport(config);
 	}
 	async send(email: string, captcha: string | number) {
+		console.log(email, captcha);
+
 		return this.mailer.sendMail({
 			from: myEmail,
 			to: email,

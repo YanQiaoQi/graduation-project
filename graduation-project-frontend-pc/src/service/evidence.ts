@@ -12,6 +12,7 @@ import {
     getFormData,
     MessageWrapper,
 } from '@/common/utils';
+import { message } from 'antd';
 
 export type createEvidencesReqBody = {};
 
@@ -71,7 +72,7 @@ export async function downloadEvidence(id: number, name: string) {
             downloadFileByBlob(res, name);
         })
         .catch((e) => {
-            console.log(e);
+            message.error("您没有权限")
         });
 }
 

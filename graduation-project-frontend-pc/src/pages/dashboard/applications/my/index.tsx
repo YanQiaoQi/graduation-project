@@ -133,7 +133,8 @@ function MyApplications() {
 
     const dataSource = useMemo(
         () => ({
-            success: data?.filter((e) => e.code === 1),
+            //@ts-ignore
+            success: data?.filter((e) => e.code === 1&&(e?.expire>=Date.now())),
 
             pending: data?.filter((e) => e.done === 0),
 

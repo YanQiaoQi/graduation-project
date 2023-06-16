@@ -13,6 +13,7 @@ export function JWT(): RequestHandler {
 	}).unless({
 		path: [
 			/^\/v2\/user\/signup/,
+			/^\/v2\/user\/resetPwd/,
 			/^\/v2\/user\/login\/.*/,
 			/^\/v2\/user\/captcha\/.*/,
 			/^\/v1\/user\//,

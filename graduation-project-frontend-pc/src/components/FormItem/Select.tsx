@@ -3,7 +3,7 @@ import { FormItem, FormItemProps } from './template';
 
 type ItemType = {
     label: string;
-    value: string;
+    value: string | number;
 };
 
 interface FormItemSelectProps extends FormItemProps {

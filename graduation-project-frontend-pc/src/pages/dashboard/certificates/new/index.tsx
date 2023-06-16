@@ -56,6 +56,7 @@ function CertificatesNewPage() {
                         required
                         label="私有证据"
                         name="isPrivate"
+                        initialValue={0}
                         getValueFromEvent={(e) => Number(e)}
                     >
                         <Switch />

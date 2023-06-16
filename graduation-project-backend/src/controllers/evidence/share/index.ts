@@ -89,6 +89,7 @@ shareRouter.post<
 >("/process/:id", async (req, res) => {
 	const id = Number(req.params.id);
 	const { code, expire } = req.body;
+
 	await fabric.updateApplication(
 		id,
 		Number(code) as Status,

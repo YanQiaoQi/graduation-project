@@ -1,6 +1,9 @@
+import { ReactNode } from 'react';
 import { Modal as AntdModal, Form } from 'antd';
 import FormItem from '@/components/FormItem';
-import { ReactNode } from 'react';
+import request from '@/common/request';
+import { URL } from '@/common/constant';
+import { MessageWrapper } from '@/common/utils';
 
 function FormModal<T>(FormItems?: ReactNode) {
     const [form] = Form.useForm();
@@ -11,9 +14,25 @@ function FormModal<T>(FormItems?: ReactNode) {
                 centered: true,
                 content: (
                     <Form
-                        layout="horizontal"
+                        layout="vertical"
                         form={form}
                         onFinish={(value) => {
+                            if (!FormItems) {
+                                console.log(value);
+
+                               
+                                    request.post(`${URL.USER}/check`, {
+                                        data: value,
+                                    })
+                                
+                                    .then(() => {
+                                        resolve(value);
+                                    })
+                                    .finally(() => {
+                                        form.resetFields();
+                                    });
+                                return;
+                            }
                             resolve(value);
                             form.resetFields();
                         }}

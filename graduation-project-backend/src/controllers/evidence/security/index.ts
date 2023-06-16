@@ -37,9 +37,17 @@ securityRouter.get<
 		});
 		return;
 	}
+	const applications =
+		fabric.getApplicantsApplications(email);
+	const targetApplications = applications?.filter(
+		(a) => a.evidenceId === evidenceId
+	);
+	const targetApplication =
+		targetApplications?.[targetApplications?.length - 1];
 	if (
 		evidence.creatorId !== email &&
-		!evidence.access?.[email]?.includes(field)
+		(!evidence.access?.[email]?.includes(field) ||
+			Date.now() > (targetApplication?.expire ?? 0))
 	) {
 		res.send({
 			status: 200,

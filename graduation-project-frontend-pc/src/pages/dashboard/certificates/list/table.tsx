@@ -25,7 +25,8 @@ function CertificateTable({
     getData,
 }: CertificateTableProps) {
     const authModal = FormModal();
-
+    console.log(columnEncryption);
+    
     const deleteCertificate = useCallback(
         (id) => () => {
             authModal().then(() =>

@@ -9,6 +9,8 @@ import Table, {
 import { format } from '@/common/utils';
 import { Email, EvidenceFieldEncryptionMap } from '@/common/type';
 import { ApplicationResBody } from '@/service/application';
+import { decryptEvidence } from '@/service/evidence';
+import FormModal from '@/components/FormModal';
 
 interface AllPageProps<T = any> extends TableProps<T> {
     apply?: boolean;
@@ -28,10 +30,17 @@ function ExpandedCertificatesTable({
     columns,
     ...restProps
 }: AllPageProps) {
+    const authModal = FormModal();
+    const onDecryptEvidence = useCallback<GetClearFunc>(
+        (id, field) => async () => {
+            return authModal().then(() => decryptEvidence(id, field));
+        },
+        [],
+    );
     const expandedRowRender = (record: ApplicationResBody) => {
         return (
             <Table
-                getClear={getClear}
+                getClear={getClear ?? onDecryptEvidence}
                 showColumnEncryption={showColumnEncryption}
                 columnEncryption={record.fieldEncryption}
                 dataSource={record.evidences}

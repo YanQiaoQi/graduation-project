@@ -39,7 +39,6 @@ function ExpandedCertificatesTable({
 
     const onApplyForDownload = useCallback(
         (id: number) => () => {
-            console.log(id);
             applyForDownload(id);
         },
         [],

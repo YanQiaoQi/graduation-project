@@ -29,9 +29,17 @@ export type EvidenceFieldEncryptionMap = Record<
 	FieldEncryption
 >;
 
+export type UserInfo = {
+	// 性别
+	sex?: Status;
+	// 身份证号
+	ID?: string;
+};
+
 export type User = {
 	password: string;
 	createTime: timeStamp;
+	info?: UserInfo;
 	evidenceFieldEncryptionMap: EvidenceFieldEncryptionMap;
 };
 
@@ -72,7 +80,9 @@ export type Meta = {
 	};
 };
 
-export type ApplyType = (keyof EvidenceFieldEncryptionMap | "download");
+export type ApplyType =
+	| keyof EvidenceFieldEncryptionMap
+	| "download";
 
 export type ApplyResult = {};
 

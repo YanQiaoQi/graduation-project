@@ -20,10 +20,6 @@ export type Certificate = {
 
 export type ColumnEncryption = Record<keyof Certificate, Encryption>;
 
-export type UserInfo = {
-    created: number;
-};
-
 export type Status = 0 | 1;
 
 export type ApplyType = 'download' | keyof EvidenceFieldEncryptionMap;
@@ -118,11 +114,20 @@ export type EvidenceFieldEncryptionMap = Record<
     | 'extension',
     FieldEncryption
 >;
+type UserInfo = {
+	// 性别
+	sex: Status;
+	// 生日
+	birthday: number;
+	// 身份证号
+	ID: string;
+};
 
 export type User = {
-    password: string;
-    createTime: timeStamp;
-    EvidenceFieldEncryptionMap: EvidenceFieldEncryptionMap;
+	password: string;
+	createTime: timeStamp;
+	info?: UserInfo;
+	evidenceFieldEncryptionMap: EvidenceFieldEncryptionMap;
 };
 
 export type Evidence = {

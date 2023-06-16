@@ -221,7 +221,7 @@ function CertificateTable({
         ?.map((col) => {
             const dataIndex = col.dataIndex as keyof DataType;
             const encryption = columnEncryption?.[dataIndex] ?? 'clear';
-            const creator = dataSource?.[0].creatorId;
+            const creator = dataSource?.[0]?.creatorId;
 
             const isEncrypted = encryption !== 'clear';
             const hasAccess =

@@ -22,13 +22,18 @@ export function splitFileName(filename: string) {
 
 const key = CryptoJS.enc.Utf8.parse("0123456789abcdef"); //密钥
 
-export function getBufferEncoding(path: string) {
+export function getBufferEncoding(
+	path: string
+): BufferEncoding {
 	const ext = Path.extname(path);
 	const image = [".jpg", ".png"];
+	const docs = [".docx", ".txt"];
 	if (image.includes(ext)) {
 		return "base64";
+	} else if (docs.includes(ext)) {
+		return "utf8";
 	}
-	return "utf8";
+	return "base64";
 }
 
 // 将文件加密
@@ -95,12 +100,14 @@ function encryptText(
 		const strData = String(data);
 
 		// 加密
-		const dataAfterEncryption = CryptoJS[
-			encryption
-		]?.encrypt(strData, key, {
-			mode: CryptoJS.mode.ECB,
-			padding: CryptoJS.pad.Pkcs7,
-		});
+		const dataAfterEncryption = CryptoJS.AES?.encrypt(
+			strData,
+			key,
+			{
+				mode: CryptoJS.mode.ECB,
+				padding: CryptoJS.pad.Pkcs7,
+			}
+		);
 
 		console.log("加密成功");
 		return dataAfterEncryption?.toString();
@@ -116,7 +123,7 @@ function decryptText(
 	if (encryption === "clear") return data;
 	const strData = String(data);
 	// 解密
-	let decrypt = CryptoJS[encryption].decrypt(strData, key, {
+	let decrypt = CryptoJS.AES.decrypt(strData, key, {
 		mode: CryptoJS.mode.ECB,
 		padding: CryptoJS.pad.Pkcs7,
 	});
@@ -209,14 +216,10 @@ export const cryptography = {
 			if (encryption === "clear")
 				return Buffer.from(data, getBufferEncoding(path));
 			// 解密
-			const decrypt = CryptoJS[encryption].decrypt(
-				data,
-				key,
-				{
-					mode: CryptoJS.mode.ECB,
-					padding: CryptoJS.pad.Pkcs7,
-				}
-			);
+			const decrypt = CryptoJS.AES.decrypt(data, key, {
+				mode: CryptoJS.mode.ECB,
+				padding: CryptoJS.pad.Pkcs7,
+			});
 			const decryptUtf8 =
 				CryptoJS.enc.Utf8.stringify(decrypt).toString();
 

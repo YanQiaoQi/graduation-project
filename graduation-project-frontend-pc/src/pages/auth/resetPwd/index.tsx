@@ -1,22 +1,40 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { Steps, Form, Button } from 'antd';
 import AuthLayout from '../components/authLayout';
 import FormItem from '../../../components/FormItem';
 import request from '../../../common/request';
 import { URL } from '@/common/constant';
 import Container from '@/components/Container';
+import { MessageWrapper, navigateTo } from '@/common/utils';
 
 interface ResetPwdProps {}
 
 function ResetPwd({}: ResetPwdProps) {
     const [current, setCurrent] = useState(0);
+    const email = useRef();
 
     const nextStep = useCallback((values) => {
-        setCurrent(1);
+        MessageWrapper(
+            request.post(`${URL.USER}/captcha/check`, {
+                data: values,
+            }),
+        ).then(() => {
+            email.current = values.email;
+            setCurrent(1);
+        });
     }, []);
 
     const resetPwd = useCallback((values) => {
-        request.post(URL.AUTH.resetPwd, {});
+        MessageWrapper(
+            request.post(URL.AUTH.resetPwd, {
+                data: {
+                    email: email.current,
+                    password: values.password,
+                },
+            }),
+        ).then(() => {
+            navigateTo('/auth/login');
+        });
     }, []);
 
     const items = useMemo(

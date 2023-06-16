@@ -108,9 +108,19 @@ crudRouter.get(
 			throw new Error("未找到证据");
 		}
 		// 鉴权
+		const applications =
+			fabric.getApplicantsApplications(applicantId);
+		const targetApplications = applications?.filter(
+			(a) => a.evidenceId === Number(id)
+		);
+		const targetApplication =
+			targetApplications?.[targetApplications?.length - 1];
 		if (
 			evidence.creatorId !== applicantId &&
-			!evidence.access?.[applicantId]?.includes("download")
+			(!evidence.access?.[applicantId]?.includes(
+				"download"
+			) ||
+				Date.now() > (targetApplication?.expire ?? 0))
 		) {
 			throw new Error("鉴权失败");
 		}
